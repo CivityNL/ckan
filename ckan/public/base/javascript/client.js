@@ -26,7 +26,7 @@
     },
 
     /* Simple helper function for both GET's and POST's to the ckan API
-     * 
+     *
      * type - GET or POST
      * path - The API endpoint
      * data - Any data you need passing to the endpoint
@@ -167,13 +167,18 @@
       data = data.result ? { 'ResultSet': { 'Result': data.result.map(function(val){ return { 'Name' :val } }) } } : data;
       // If given a Result dict inside a ResultSet dict then use the Result dict.
       var raw = jQuery.isArray(data) ? data : data.ResultSet && data.ResultSet.Result || {};
+      // Civity DEV Gil Erik Temporary Fix for autocomplete API calls from Actions
+      if (!jQuery.isArray(data) && data.result){
+        raw = data.result;
+      }
 
       var items = jQuery.map(raw, function (item) {
         var key = typeof options.key != 'undefined' ? item[options.key] : false;
         var label = typeof options.label != 'undefined' ? item[options.label] : false;
 
         let children = item.children;
-        item = typeof item === 'string' ? item : item.name || item.Name || item.Format || '';
+        // Allows to specify the field to pick the value from in the templates (options.key)
+        item = typeof item === 'string' ? item : item.name || item.Name || item.Format || item[options.key] || '';
         item = jQuery.trim(item);
 
         key = key ? key : item;

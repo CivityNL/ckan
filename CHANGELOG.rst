@@ -9,6 +9,22 @@ Changelog
 
 .. towncrier release notes start
 
+
+v.2.9.8-civity 2023-03-31
+==================
+
+- [client.js] Fix for autocomplete API calls from Actions (compatible with v3 api calls)
+- [client.js] Allows to specify the field to pick the value from in the templates (passed by options.key)
+- DataStore: [action.py] Remove alias from 'datastore_create'
+- DataStore: [set_permissions.sql] Remove 'Alias' functionality to make other Views (not generated from 'alias' functionality) to be compatible with DataStore
+- DataStore: [set_permissions.sql] Optimizing full_text triggers and implementations to work with non-DataStore generated tables and geometry columns
+- [forms.html] Allow to set <option> attributes for "select" form
+- [model_save.py] Check for "missing" in extra_dict['value'] on 'package_extras_save' function
+- [ckan/cli/__init__.py] Allow plugin separate config sections starting with 'plugin:'
+-
+
+
+
 v.2.9.8 2023-02-15
 ==================
 

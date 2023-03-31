@@ -10,6 +10,7 @@ from six import string_types
 
 import ckan.lib.dictization as d
 import ckan.authz as authz
+from ckan.lib.navl.dictization_functions import missing
 
 log = logging.getLogger(__name__)
 
@@ -110,7 +111,7 @@ def package_extras_save(extra_dicts, pkg, context):
         if extra_dict.get("deleted"):
             continue
 
-        if extra_dict['value'] is None:
+        if extra_dict['value'] is None or extra_dict['value'] is missing:
             pass
         else:
             new_extras[extra_dict["key"]] = extra_dict["value"]

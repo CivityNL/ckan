@@ -31,15 +31,20 @@ class CKANConfigLoader(object):
         defaults = {u'here': os.path.dirname(os.path.abspath(filename))}
         self._update_defaults(defaults)
         self.parser.read(filename)
+        self.plugins = [s for s in self.parser.sections() if s.startswith('plugin:')]
 
-    def _update_config(self):
-        options = self.parser.options(self.section)
+    def _update_config_section(self, section):
+        options = self.parser.options(section)
         for option in options:
             if option not in self.config or option in self.parser.defaults():
-                value = self.parser.get(self.section, option)
+                value = self.parser.get(section, option)
                 self.config[option] = value
                 if option in self.parser.defaults():
                     self.config[u'global_conf'][option] = value
+
+    def _update_config(self):
+        for section in [self.section] + self.plugins:
+            self._update_config_section(section)
 
     def _create_config_object(self):
         use_config_path = self.config_file

@@ -94,6 +94,7 @@ def datastore_create(context, data_dict):
     schema = context.get('schema', dsschema.datastore_create_schema())
     records = data_dict.pop('records', None)
     resource = data_dict.pop('resource', None)
+    data_dict.pop('aliases', None)
     data_dict, errors = _validate(data_dict, schema, context)
     resource_dict = None
     if records:
