@@ -164,13 +164,9 @@
       // new syntax (not used until all browsers support arrow notation):
       //data = data.result ? { 'ResultSet': { 'Result': data.result.map(x => ({'Name': x})) } } : data;
       // compatible syntax:
-      data = data.result ? { 'ResultSet': { 'Result': data.result.map(function(val){ return { 'Name' :val } }) } } : data;
+      data = data.result ? { 'ResultSet': { 'Result': data.result.map(function(val){ return val; }) } } : data;
       // If given a Result dict inside a ResultSet dict then use the Result dict.
       var raw = jQuery.isArray(data) ? data : data.ResultSet && data.ResultSet.Result || {};
-      // Civity DEV Gil Erik Temporary Fix for autocomplete API calls from Actions
-      if (!jQuery.isArray(data) && data.result){
-        raw = data.result;
-      }
 
       var items = jQuery.map(raw, function (item) {
         var key = typeof options.key != 'undefined' ? item[options.key] : false;
