@@ -435,7 +435,7 @@ content type, cookies, etc.
         # of named tuples `FrameInfo`. Don't forget to remove
         # `getframeinfo` wrapper after migration.
         filename = None
-        if cls.current_plugin:
+        if cls._current_plugin:
             filename = inspect.getfile(cls._current_plugin.__class__)
         if not filename:
             filename = inspect.getframeinfo(inspect.stack(0)[1][0]).filename
