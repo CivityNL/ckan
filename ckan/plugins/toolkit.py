@@ -1,7 +1,8 @@
 # encoding: utf-8
 
 import sys
-
+import logging
+log = logging.getLogger(__name__)
 
 class _Toolkit(object):
     '''This class is intended to make functions/objects consistently
@@ -15,6 +16,7 @@ class _Toolkit(object):
     Functions/objects should only be removed after reasonable
     deprecation notice has been given.'''
 
+    _current_plugin = None
     # contents should describe the available functions/objects. We check
     # that this list matches the actual availables in the initialisation
     contents = [
@@ -397,7 +399,11 @@ content type, cookies, etc.
         # TODO: starting from python 3.5, `inspect.stack` returns list
         # of named tuples `FrameInfo`. Don't forget to remove
         # `getframeinfo` wrapper after migration.
-        filename = inspect.getframeinfo(inspect.stack()[2][0]).filename
+        filename = None
+        if cls._current_plugin:
+            filename = inspect.getfile(cls._current_plugin.__class__)
+        if not filename:
+            filename = inspect.getframeinfo(inspect.stack(0)[2][0]).filename
 
         this_dir = os.path.dirname(filename)
         absolute_path = os.path.join(this_dir, relative_path)
@@ -428,7 +434,11 @@ content type, cookies, etc.
         # TODO: starting from python 3.5, `inspect.stack` returns list
         # of named tuples `FrameInfo`. Don't forget to remove
         # `getframeinfo` wrapper after migration.
-        filename = inspect.getframeinfo(inspect.stack()[1][0]).filename
+        filename = None
+        if cls.current_plugin:
+            filename = inspect.getfile(cls._current_plugin.__class__)
+        if not filename:
+            filename = inspect.getframeinfo(inspect.stack(0)[1][0]).filename
 
         this_dir = os.path.dirname(filename)
         absolute_path = os.path.join(this_dir, path)
@@ -550,6 +560,10 @@ content type, cookies, etc.
         if len(endpoint) == 1:
             return endpoint + ('index', )
         return endpoint
+
+    @classmethod
+    def set_current_plugin(cls, plugin):
+        cls._current_plugin = plugin
 
     def __getattr__(self, name):
         ''' return the function/object requested '''

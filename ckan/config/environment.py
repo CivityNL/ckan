@@ -168,13 +168,16 @@ def update_config():
     changes into account. It is called whenever a plugin is loaded as the
     plugin might have changed the config values (for instance it might
     change ckan.site_url) '''
+    import ckan.plugins.toolkit as toolkit
 
     webassets_init()
 
     for plugin in p.PluginImplementations(p.IConfigurer):
         # must do update in place as this does not work:
         # config = plugin.update_config(config)
+        toolkit.set_current_plugin(plugin)
         plugin.update_config(config)
+        toolkit.set_current_plugin(None)
 
     # Set whitelisted env vars on config object
     # This is set up before globals are initialized
