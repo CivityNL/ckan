@@ -16,7 +16,6 @@ class _Toolkit(object):
     Functions/objects should only be removed after reasonable
     deprecation notice has been given.'''
 
-    _current_plugin = None
     # contents should describe the available functions/objects. We check
     # that this list matches the actual availables in the initialisation
     contents = [
@@ -388,9 +387,16 @@ content type, cookies, etc.
         add_public_path(path, url)
 
     @classmethod
+    def _get_filename_from_inspect(cls, depth=0):
+        import inspect
+        frame = inspect.currentframe()
+        for _ in range(depth + 1):
+            frame = frame.f_back
+        return frame.f_code.co_filename
+
+    @classmethod
     def _add_served_directory(cls, config, relative_path, config_var):
         ''' Add extra public/template directories to config. '''
-        import inspect
         import os
 
         assert config_var in ('extra_template_paths', 'extra_public_paths')
@@ -399,12 +405,7 @@ content type, cookies, etc.
         # TODO: starting from python 3.5, `inspect.stack` returns list
         # of named tuples `FrameInfo`. Don't forget to remove
         # `getframeinfo` wrapper after migration.
-        filename = None
-        if cls._current_plugin:
-            filename = inspect.getfile(cls._current_plugin.__class__)
-        if not filename:
-            filename = inspect.getframeinfo(inspect.stack(0)[2][0]).filename
-
+        filename = cls._get_filename_from_inspect(2)
         this_dir = os.path.dirname(filename)
         absolute_path = os.path.join(this_dir, relative_path)
         if absolute_path not in config.get(config_var, '').split(','):
@@ -425,7 +426,6 @@ content type, cookies, etc.
         See :doc:`/theming/index` for more details.
 
         '''
-        import inspect
         import os
         from ckan.lib.webassets_tools import create_library
 
@@ -434,12 +434,7 @@ content type, cookies, etc.
         # TODO: starting from python 3.5, `inspect.stack` returns list
         # of named tuples `FrameInfo`. Don't forget to remove
         # `getframeinfo` wrapper after migration.
-        filename = None
-        if cls._current_plugin:
-            filename = inspect.getfile(cls._current_plugin.__class__)
-        if not filename:
-            filename = inspect.getframeinfo(inspect.stack(0)[1][0]).filename
-
+        filename = cls._get_filename_from_inspect(1)
         this_dir = os.path.dirname(filename)
         absolute_path = os.path.join(this_dir, path)
         create_library(name, absolute_path)
@@ -560,10 +555,6 @@ content type, cookies, etc.
         if len(endpoint) == 1:
             return endpoint + ('index', )
         return endpoint
-
-    @classmethod
-    def set_current_plugin(cls, plugin):
-        cls._current_plugin = plugin
 
     def __getattr__(self, name):
         ''' return the function/object requested '''
