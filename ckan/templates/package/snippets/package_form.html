@@ -39,6 +39,12 @@ then itself be extended to add/remove blocks of functionality. #}
           <a class="btn btn-danger pull-left" href="{% url_for dataset_type ~ '.delete', id=data.id %}" data-module="confirm-action" data-module-content="{{ _('Are you sure you want to delete this dataset?') }}">{% block delete_button_text %}{{ _('Delete') }}{% endblock %}</a>
         {% endif %}
       {% endblock %}
+      {% block save_without_resources_button %}
+        {% if h.check_config_option('ckan.dataset.create_on_ui_requires_resources')
+        <button class="btn btn-primary" type="submit" name="save" value="go-metadata">
+          {% block save_without_resources_button_text %}{{ _('Save without data') }}{% endblock %}
+        </button>
+      {% endblock %}
       {% block save_button %}
         <button class="btn btn-primary" type="submit" name="save">{% block save_button_text %}{{ _('Next: Add Data') }}{% endblock %}</button>
       {% endblock %}
