@@ -2778,7 +2778,8 @@ def check_config_permission(permission):
 
 
 @core_helper
-def check_config_option(config_option):
+def get_boolean_config_option(config_option):
+    """Helper function for getting boolean configuration options"""
     return asbool(config.get(config_option))
 
 
