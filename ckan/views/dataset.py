@@ -590,13 +590,28 @@ class CreateView(MethodView):
             context[u'message'] = data_dict.get(u'log_message', u'')
             pkg_dict = get_action(u'package_create')(context, data_dict)
 
+            create_on_ui_requires_resources = h.get_boolean_config_option(
+                'ckan.dataset.create_on_ui_requires_resources'
+            )
             if ckan_phase:
-                # redirect to add dataset resources
-                url = h.url_for(
-                    u'{}_resource.new'.format(package_type),
-                    id=pkg_dict[u'name']
+                if create_on_ui_requires_resources or not request.form[u'save'] == 'go-metadata':
+                    # redirect to add dataset resources if
+                    # create_on_ui_requires_resources is set to true
+                    # or user explicitly wants to add resources
+                    url = h.url_for(
+                        u'{}_resource.new'.format(package_type),
+                        id=pkg_dict[u'name']
+                    )
+                    return h.redirect_to(url)
+
+                get_action(u'package_update')(
+                    dict(context, allow_state_change=True),
+                    dict(pkg_dict, state=u'active')
                 )
-                return h.redirect_to(url)
+                return h.redirect_to(
+                    u'{}.read'.format(package_type),
+                    id=pkg_dict["id"]
+                )
 
             return _form_save_redirect(
                 pkg_dict[u'name'], u'new', package_type=package_type

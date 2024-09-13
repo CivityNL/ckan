@@ -2778,6 +2778,12 @@ def check_config_permission(permission):
 
 
 @core_helper
+def get_boolean_config_option(config_option):
+    """Helper function for getting boolean configuration options"""
+    return asbool(config.get(config_option))
+
+
+@core_helper
 def get_organization(org=None, include_datasets=False):
     if org is None:
         return {}
