@@ -1,8 +1,7 @@
 # encoding: utf-8
 
 import sys
-import logging
-log = logging.getLogger(__name__)
+
 
 class _Toolkit(object):
     '''This class is intended to make functions/objects consistently
@@ -387,7 +386,11 @@ content type, cookies, etc.
         add_public_path(path, url)
 
     @classmethod
-    def _get_filename_from_inspect(cls, depth=0):
+    def _get_filename_from_inspect(cls, depth=0) -> str:
+        """
+        This method will return the filename of the frame going `depth` deep.
+        It will take into account the additional +1 for this method itself.
+        """
         import inspect
         frame = inspect.currentframe()
         for _ in range(depth + 1):
