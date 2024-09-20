@@ -386,9 +386,20 @@ content type, cookies, etc.
         add_public_path(path, url)
 
     @classmethod
+    def _get_filename_from_inspect(cls, depth=0) -> str:
+        """
+        This method will return the filename of the frame going `depth` deep.
+        It will take into account the additional +1 for this method itself.
+        """
+        import inspect
+        frame = inspect.currentframe()
+        for _ in range(depth + 1):
+            frame = frame.f_back
+        return frame.f_code.co_filename
+
+    @classmethod
     def _add_served_directory(cls, config, relative_path, config_var):
         ''' Add extra public/template directories to config. '''
-        import inspect
         import os
 
         assert config_var in ('extra_template_paths', 'extra_public_paths')
@@ -397,8 +408,7 @@ content type, cookies, etc.
         # TODO: starting from python 3.5, `inspect.stack` returns list
         # of named tuples `FrameInfo`. Don't forget to remove
         # `getframeinfo` wrapper after migration.
-        filename = inspect.getframeinfo(inspect.stack()[2][0]).filename
-
+        filename = cls._get_filename_from_inspect(2)
         this_dir = os.path.dirname(filename)
         absolute_path = os.path.join(this_dir, relative_path)
         if absolute_path not in config.get(config_var, '').split(','):
@@ -419,7 +429,6 @@ content type, cookies, etc.
         See :doc:`/theming/index` for more details.
 
         '''
-        import inspect
         import os
         from ckan.lib.webassets_tools import create_library
 
@@ -428,8 +437,7 @@ content type, cookies, etc.
         # TODO: starting from python 3.5, `inspect.stack` returns list
         # of named tuples `FrameInfo`. Don't forget to remove
         # `getframeinfo` wrapper after migration.
-        filename = inspect.getframeinfo(inspect.stack()[1][0]).filename
-
+        filename = cls._get_filename_from_inspect(1)
         this_dir = os.path.dirname(filename)
         absolute_path = os.path.join(this_dir, path)
         create_library(name, absolute_path)
