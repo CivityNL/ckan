@@ -44,22 +44,26 @@ def package_patch(context, data_dict):
     # CIVDEV-1062 required the package_patch to also treat the given resources
     # as patches instead of replacing the resources with (mostly incomplete) ones.
 
-    patched_package = _get_action('package_show')(
+    package_dict = _get_action('package_show')(
         show_context,
         {'id': _get_or_bust(data_dict, 'id')})
 
-    data_dict["id"] = patched_package["id"]
+    patched_package = dict(package_dict)
 
-    patched_resources = patched_package.pop("resources", [])
-    data_dict_resources = data_dict.pop("resources", [])
-    for idx, res in enumerate(patched_resources):
-        for patched_res in data_dict_resources:
-            if res.get("id") == patched_res.get("id", None):
-                patched_resources[idx].update(patched_res)
-                break
+    # if resources are given we want to also patch those if an original resource
+    # with the same `id` already exists and add these patched resources to the package
+    if "resources" in data_dict:
+        original_resources = package_dict.pop("resources", [])
+        patched_resources = data_dict.pop("resources", [])
+        for idx, patched_res in enumerate(patched_resources):
+            for original_res in original_resources:
+                if original_res.get("id") == patched_res.get("id", None):
+                    patched_resources[idx] = dict(original_res, **patched_res)
+                    break
+        patched_package['resources'] = patched_resources
 
-    patched_package['resources'] = patched_resources
     patched_package.update(data_dict)
+    patched_package['id'] = package_dict['id']
 
     return _get_action('package_update')(context, patched_package)
 

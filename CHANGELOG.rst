@@ -9,6 +9,13 @@ Changelog
 
 .. towncrier release notes start
 
+v.2.9.11+civity.2.1 2024-09-30
+===================
+
+Bugfixes
+--------
+- Fixed bug when updating package with multiple resources. (`CIVDEV-1101 <https://civity.atlassian.net/browse/CIVDEV-1101>`_)
+
 
 v.2.9.11 2024-03-13
 ===================
