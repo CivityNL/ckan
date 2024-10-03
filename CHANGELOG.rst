@@ -17,6 +17,7 @@ Major features
 
 Bugfixes
 --------
+- Fixed bug with the 'Save without data' showing up on edit pages. (`CIVDEV-1104 <https://civity.atlassian.net/browse/CIVDEV-1104>`_)
 
 Minor changes
 -------------
