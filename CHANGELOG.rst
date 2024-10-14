@@ -9,6 +9,19 @@ Changelog
 
 .. towncrier release notes start
 
+v.2.9.11+civity.3 TBD
+===================
+
+Major features
+--------------
+
+Bugfixes
+--------
+- Fixed bug with the 'Save without data' showing up on edit pages. (`CIVDEV-1104 <https://civity.atlassian.net/browse/CIVDEV-1104>`_)
+
+Minor changes
+-------------
+
 v.2.9.11+civity.2.1 2024-09-30
 ===================
 
