@@ -21,6 +21,7 @@ Bugfixes
 
 Minor changes
 -------------
+- Added a subset of 19 PostGIS functons to the list of allowed DataStore functions. (`CIVDEV-1158 <https://civity.atlassian.net/browse/CIVDEV-1158>`_)
 
 v.2.9.11+civity.2.1 2024-09-30
 ===================
