@@ -16,99 +16,38 @@ functions can be used and provides examples on how to use them.
 To convert to text formats
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-- ST_ASEWKT - Well Known Text, with CRS information. https://postgis.net/docs/ST_AsEWKT.html
-- ST_ASGEOJSON - GeoJSON. https://postgis.net/docs/ST_AsGeoJSON.html
-- ST_ASGML - GML. https://postgis.net/docs/ST_AsGML.html
-- ST_ASTEXT - Well Known Text, without CRS information. https://postgis.net/docs/ST_AsText.html
+- ST_ASEWKT - Well Known Text, with CRS information. See https://postgis.net/docs/ST_AsEWKT.html
+- ST_ASGEOJSON - GeoJSON. See https://postgis.net/docs/ST_AsGeoJSON.html
+- ST_ASGML - GML. See https://postgis.net/docs/ST_AsGML.html
+- ST_ASTEXT - Well Known Text, without CRS information. See https://postgis.net/docs/ST_AsText.html
 
 To select different representations of the geometries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- ST_BUFFER. https://postgis.net/docs/ST_Buffer.html
-- ST_CENTROID
-- ST_CLOSESTPOINT
+- ST_BUFFER. See https://postgis.net/docs/ST_Buffer.html
+- ST_CENTROID. See https://postgis.net/docs/ST_Centroid.html
+- ST_CLOSESTPOINT. See https://postgis.net/docs/ST_ClosestPoint.html
 
 Overlays to be able to join tables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- ST_CONTAINS
-- ST_COVERS
-- ST_DFULLYWITHIN
-- ST_DWITHIN
-- ST_INTERSECTS
-- ST_UNION
-- ST_WITHIN
+- ST_CONTAINS. See https://postgis.net/docs/ST_Contains.html
+- ST_COVERS. See https://postgis.net/docs/ST_Covers.html
+- ST_DFULLYWITHIN. See https://postgis.net/docs/ST_DFullyWithin.html
+- ST_DWITHIN. See https://postgis.net/docs/ST_DWithin.html
+- ST_INTERSECTS. See https://postgis.net/docs/ST_Intersects.html
+- ST_UNION. See https://postgis.net/docs/ST_Union.html
+- ST_WITHIN. See https://postgis.net/docs/ST_Within.html
 
 To be able to create geometries to be used in overlays
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- ST_GEOMFROMEWKT
-- ST_GEOMFROMGEOJSON
-- ST_GEOMFROMGML
-- ST_GEOMFROMTEXT
-- ST_SETSRID
+- ST_GEOMFROMEWKT. Create geometry from Well Known Text (WKT) with spatial reference information. See https://postgis.net/docs/ST_GeomFromEWKT.html
+- ST_GEOMFROMGEOJSON. Create geometry from GeoJSON. See https://postgis.net/docs/ST_GeomFromGeoJSON.html
+- ST_GEOMFROMGML. Create geometry from Geography Markup Language (GML). See https://postgis.net/docs/ST_GeomFromGML.html
+- ST_GEOMFROMTEXT. Create geometry from Well Known Text (WKT). See https://postgis.net/docs/ST_GeomFromText.html
+- ST_SETSRID. Geometries created using the ST_GEOMFROMGEOJSON and ST_GEOMFROMTEXT functions will not have spatial reference information (EPSG code). As a consequence, spatial queries will fail due to a mismatch between the coordinate reference systems. Use this function to attach an EPSG code to the geometry. See https://postgis.net/docs/ST_SetSRID.html. 
   
-What is it good for?
-~~~~~~~~~~~~~~~~~~~~
+Examples
+~~~~~~~~
 
-reStructuredText can be used, for example, to
-
-- write technical documentation (so that it can easily be offered as a
-  pdf file or a web page)
-
-- create html webpages without knowing html 
-
-- to document source code
-
-Show me some formatting examples
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You can highlight text in *italics* or, to provide even more emphasis
-in **bold**. Often, when describing computer code, we like to use a
-``fixed space font`` to quote code snippets.
-
-We can also include footnotes [1]_. We could include source code files
-(by specifying their name) which is useful when documenting code. We
-can also copy source code verbatim (i.e. include it in the rst
-document) like this::
-
-  int main ( int argc, char *argv[] ) {
-      printf("Hello World\n");
-      return 0;
-  }
-
-We have already seen at itemised list in section `What is it good
-for?`_. Enumerated list and descriptive lists are supported as
-well. It provides very good support for including html-links in a
-variety of ways. Any section and subsections defined can be linked to,
-as well.
-
-
-Where can I learn more?
-~~~~~~~~~~~~~~~~~~~~~~~
-
-reStructuredText is described at
-http://docutils.sourceforge.net/rst.html. We provide some geeky small
-print in this footnote [2]_.
-
-
-Show me some more stuff, please
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-We can also include figures:
-
-.. figure:: image.png
-   :width: 300pt
-
-
-   The magnetisation in a small ferromagnetic disk. The diametre is of the order of 120 nanometers and the material is Ni20Fe80. Png is a file format that is both acceptable for html pages as well as for (pdf)latex.
-
----------------------------------------------------------------------------
-
-.. [1] although there isn't much point of using a footnote here.
-
-.. [2] Random facts: 
-
-  - Emacs provides an rst mode 
-  - when converting rst to html, a style sheet can be provided (there is a similar feature for latex)
-  - rst can also be converted into XML
-  - the recommended file extension for rst is ``.txt``
