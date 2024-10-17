@@ -4,7 +4,7 @@ PostGIS functions in data store queries
 
 .. sectnum::
 
-.. contents:: The tiny table of contents
+.. contents:: Table of contents
 
 Introduction
 ~~~~~~~~~~~~
@@ -51,4 +51,4 @@ To be able to create geometries to be used in overlays
   
 Examples
 ~~~~~~~~
-
+''https://tst-ckan.dataplatform.nl/api/3/action/datastore_search_sql?sql=SELECT%20*%20from%20airview_measurement_cuesgoom%20WHERE%20recording_timestamp%20%3E%20%272023-06-01%27''
