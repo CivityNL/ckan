@@ -47,6 +47,7 @@ To be able to create geometries to be used in overlays
 - ST_GEOMFROMGML. Create geometry from Geography Markup Language (GML). See https://postgis.net/docs/ST_GeomFromGML.html
 - ST_GEOMFROMTEXT. Create geometry from Well Known Text (WKT). See https://postgis.net/docs/ST_GeomFromText.html
 - ST_SETSRID. Geometries created using the ST_GEOMFROMGEOJSON and ST_GEOMFROMTEXT functions will not have spatial reference information (EPSG code). As a consequence, spatial queries will fail due to a mismatch between the coordinate reference systems. Use this function to attach an EPSG code to the geometry. See https://postgis.net/docs/ST_SetSRID.html. 
+- ST_TRANSFORM. To transform geometries from one coordinate reference system to another to avoid a mismatch between coordinate reference systems when doing overlays. See https://postgis.net/docs/ST_Transform.html. 
   
 Examples
 ~~~~~~~~
