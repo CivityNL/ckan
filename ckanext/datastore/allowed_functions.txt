@@ -251,6 +251,7 @@ st_geomfromgml
 st_geomfromtext
 st_intersects
 st_setsrid
+st_transform
 st_union
 st_within
 statement_timestamp
