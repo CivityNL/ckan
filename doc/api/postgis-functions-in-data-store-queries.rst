@@ -17,14 +17,14 @@ To convert to text formats
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
   
 - ST_ASEWKT - Well Known Text, with CRS information. https://postgis.net/docs/ST_AsEWKT.html
-- ST_ASGEOJSON - GeoJSON
-- ST_ASGML - GML
+- ST_ASGEOJSON - GeoJSON. https://postgis.net/docs/ST_AsGeoJSON.html
+- ST_ASGML - GML. https://postgis.net/docs/ST_AsGML.html
 - ST_ASTEXT - Well Known Text, without CRS information. https://postgis.net/docs/ST_AsText.html
 
 To select different representations of the geometries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- ST_BUFFER
+- ST_BUFFER. https://postgis.net/docs/ST_Buffer.html
 - ST_CENTROID
 - ST_CLOSESTPOINT
 
