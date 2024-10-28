@@ -21,10 +21,10 @@ To convert to text formats
 - GML: ST_ASGML_.
 - Well Known Text, without CRS information: ST_ASTEXT_.
 
-.. _ST_ASEWKT: Well Known Text, with CRS information. See https://postgis.net/docs/ST_AsEWKT.html
-.. _ST_ASGEOJSON: GeoJSON. See https://postgis.net/docs/ST_AsGeoJSON.html
-.. _ST_ASGML: GML. See https://postgis.net/docs/ST_AsGML.html
-.. _ST_ASTEXT: Well Known Text, without CRS information. See https://postgis.net/docs/ST_AsText.html
+.. _ST_ASEWKT: https://postgis.net/docs/ST_AsEWKT.html
+.. _ST_ASGEOJSON: https://postgis.net/docs/ST_AsGeoJSON.html
+.. _ST_ASGML: https://postgis.net/docs/ST_AsGML.html
+.. _ST_ASTEXT: https://postgis.net/docs/ST_AsText.html
 
 Example: select geometry as Well Known Text and GML
 ---------------------------------------------------
@@ -34,8 +34,8 @@ Example: select geometry as Well Known Text and GML
 To select different representations of the geometries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- A ST_BUFFER_. 
-- ST_CENTROID_. B
+- ST_BUFFER_. 
+- ST_CENTROID_.
 - ST_CLOSESTPOINT_. 
 
 .. _ST_BUFFER: https://postgis.net/docs/ST_Buffer.html
