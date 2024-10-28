@@ -22,7 +22,7 @@ To convert to text formats
 - ST_ASTEXT - Well Known Text, without CRS information. See https://postgis.net/docs/ST_AsText.html
 
 Example: select geometry as Well Known Text and GML
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------------------------
 
 ``curl --location 'https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT ST_ASTEXT(wkb_geometry) AS wkt, ST_ASGML(wkb_geometry) AS gml FROM random_points_1024_csv limit 5'`` 
 
@@ -45,7 +45,7 @@ Overlays to be able to join tables
 - ST_WITHIN. See https://postgis.net/docs/ST_Within.html
 
 Example: count the number of points within each municipality
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------------------
 
 ``curl --location 'https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT a.gm_code, a.gm_naam, ST_ASTEXT(a.wkb_geometry) AS the_geom, AVG(b.random_amount), COUNT(b.random_amount) FROM gemeenten_2022_v2_zip AS a JOIN random_points_1024_gpkg AS b ON a.h2o %3D %27NEE%27 AND ST_INTERSECTS(a.wkb_geometry, b.wkb_geometry) GROUP BY a.gm_code, a.gm_naam, ST_ASTEXT(a.wkb_geometry)'``
 
