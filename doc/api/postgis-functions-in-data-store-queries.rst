@@ -34,8 +34,8 @@ Example: select geometry as Well Known Text and GML
 To select different representations of the geometries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- ST_BUFFER_. 
-- ST_CENTROID_. 
+- A ST_BUFFER_. 
+- ST_CENTROID_. B
 - ST_CLOSESTPOINT_. 
 
 .. _ST_BUFFER: https://postgis.net/docs/ST_Buffer.html
