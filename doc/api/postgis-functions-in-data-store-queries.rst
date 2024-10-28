@@ -21,6 +21,8 @@ To convert to text formats
 - ST_ASGML - GML. See https://postgis.net/docs/ST_AsGML.html
 - ST_ASTEXT - Well Known Text, without CRS information. See https://postgis.net/docs/ST_AsText.html
 
+``curl --location 'https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT ST_ASTEXT(wkb_geometry AS wkt) ST_ASGML(wkb_geometry) AS gml FROM random_points_1024_CSV limit 5'`` 
+
 To select different representations of the geometries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
