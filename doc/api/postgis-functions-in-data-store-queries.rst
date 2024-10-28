@@ -29,7 +29,7 @@ To convert to text formats
 Example
 -------
 
-`Select geometry as Well Known Text and GML <https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT%20ST_ASTEXT(wkb_geometry)%20AS%20wkt,%20ST_ASGML(wkb_geometry)%20AS%20gml%20FROM%20random_points_1024_csv%20limit%205>`_ 
+Select geometry as Well Known Text and GML: `click <https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT%20ST_ASTEXT(wkb_geometry)%20AS%20wkt,%20ST_ASGML(wkb_geometry)%20AS%20gml%20FROM%20random_points_1024_csv%20limit%205>`_ 
 
 To select different representations of the geometries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -42,10 +42,10 @@ To select different representations of the geometries
 .. _ST_CENTROID: https://postgis.net/docs/ST_Centroid.html
 .. _ST_CLOSESTPOINT: https://postgis.net/docs/ST_ClosestPoint.html
 
-Example: 
-------------------------------------------------------------------------------------------------
+Example 
+-------
 
-`Select GML representation of a point, with spatial reference ID and a 1000 meter buffer <https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT%20ST_ASGML(ST_BUFFER(ST_SETSRID(ST_GEOMFROMTEXT(%27POINT(142735.75%20470715.91)%27)%2C%2028992)%2C%201000))%20AS%20buffer_geom>`_
+Select GML representation of a point, with spatial reference ID and a 1000 meter buffer: `click <https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT%20ST_ASGML(ST_BUFFER(ST_SETSRID(ST_GEOMFROMTEXT(%27POINT(142735.75%20470715.91)%27)%2C%2028992)%2C%201000))%20AS%20buffer_geom>`_
 
 Overlays to be able to join tables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,10 +66,10 @@ Overlays to be able to join tables
 .. _ST_UNION: https://postgis.net/docs/ST_Union.html
 .. _ST_WITHIN: https://postgis.net/docs/ST_Within.html
 
-Example: count the number of points within each municipality
+Example: 
 ------------------------------------------------------------
 
-``curl --location 'https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT a.gm_code, a.gm_naam, ST_ASTEXT(a.wkb_geometry) AS the_geom, AVG(b.random_amount), COUNT(b.random_amount) FROM gemeenten_2022_v2_zip AS a JOIN random_points_1024_gpkg AS b ON a.h2o = 'NEE' AND ST_INTERSECTS(a.wkb_geometry, b.wkb_geometry) GROUP BY a.gm_code, a.gm_naam, ST_ASTEXT(a.wkb_geometry)'``
+Count the number of points within each municipality: `click <https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT a.gm_code, a.gm_naam, ST_ASTEXT(a.wkb_geometry) AS the_geom, AVG(b.random_amount), COUNT(b.random_amount) FROM gemeenten_2022_v2_zip AS a JOIN random_points_1024_gpkg AS b ON a.h2o = 'NEE' AND ST_INTERSECTS(a.wkb_geometry, b.wkb_geometry) GROUP BY a.gm_code, a.gm_naam, ST_ASTEXT(a.wkb_geometry)`_
 
 To be able to create geometries to be used in overlays
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
