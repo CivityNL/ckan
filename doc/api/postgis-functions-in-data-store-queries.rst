@@ -47,7 +47,7 @@ Example: select GML representation of a point, with spatial reference ID and a 1
 
 st_bufer_example_.
 
-.. _st_buffer_example: `https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT ST_ASGML(ST_BUFFER(ST_SETSRID(ST_GEOMFROMTEXT('POINT(142735.75 470715.91)'), 28992), 1000)) AS buffer_geom`
+.. _st_buffer_example: https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT%20ST_ASGML(ST_BUFFER(ST_SETSRID(ST_GEOMFROMTEXT(%27POINT(142735.75%20470715.91)%27)%2C%2028992)%2C%201000))%20AS%20buffer_geom
 
 ``
 {
