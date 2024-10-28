@@ -9,7 +9,7 @@ PostGIS functions in data store queries
 Introduction
 ~~~~~~~~~~~~
 
-Using the CKAN data store API, queries against data in the CKAN data store can be executed. 
+Using the `CKAN data store API<https://docs.ckan.org/en/2.9/maintaining/datastore.html#the-datastore-api>`_., queries against data in the CKAN data store can be executed. 
 It is possible to use some PostGIS functions in those queries. This document describes which 
 functions can be used and provides examples on how to use them. 
 
@@ -46,25 +46,6 @@ Example: select GML representation of a point, with spatial reference ID and a 1
 ------------------------------------------------------------------------------------------------
 
 ``curl --location 'https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT%20ST_ASGML(ST_BUFFER(ST_SETSRID(ST_GEOMFROMTEXT(%27POINT(142735.75%20470715.91)%27)%2C%2028992)%2C%201000))%20AS%20buffer_geom'``
-
-``{
-    "help": "https://tst-ckan.dataplatform.nl/api/3/action/help_show?name=datastore_search_sql",
-    "success": true,
-    "result": {
-        "sql": "SELECT ST_ASGML(ST_BUFFER(ST_SETSRID(ST_GEOMFROMTEXT('POINT(142735.75 470715.91)'), 28992), 1000)) AS buffer_geom",
-        "records": [
-            {
-                "buffer_geom": "<gml:Polygon srsName=\"EPSG:28992\"><gml:outerBoundaryIs><gml:LinearRing><gml:coordinates>143735.75,470715.91 143716.53528040324,470520.8196779838 143659.6295325113,470333.2265676349 143567.21961230255,470160.3397669804 143442.85678118654,470008.80321881344 143291.3202330196,469884.4403876974 143118.4334323651,469792.0304674887 142930.84032201613,469735.12471959676 142735.75,469715.91 142540.65967798387,469735.12471959676 142353.0665676349,469792.0304674887 142180.1797669804,469884.4403876974 142028.64321881346,470008.80321881344 141904.28038769745,470160.3397669804 141811.8704674887,470333.2265676349 141754.96471959676,470520.8196779838 141735.75,470715.91 141754.96471959676,470911.00032201613 141811.8704674887,471098.59343236504 141904.28038769745,471271.48023301957 142028.64321881346,471423.0167811865 142180.1797669804,471547.3796123025 142353.0665676349,471639.78953251126 142540.65967798387,471696.6952804032 142735.75,471715.91 142930.84032201613,471696.6952804032 143118.4334323651,471639.78953251126 143291.3202330196,471547.3796123025 143442.85678118654,471423.0167811865 143567.21961230255,471271.48023301957 143659.6295325113,471098.59343236504 143716.53528040324,470911.00032201613 143735.75,470715.91</gml:coordinates></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>"
-            }
-        ],
-        "fields": [
-            {
-                "id": "buffer_geom",
-                "type": "text"
-            }
-        ]
-    }
-}``
 
 Overlays to be able to join tables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
