@@ -21,7 +21,10 @@ To convert to text formats
 - ST_ASGML - GML. See https://postgis.net/docs/ST_AsGML.html
 - ST_ASTEXT - Well Known Text, without CRS information. See https://postgis.net/docs/ST_AsText.html
 
-``curl --location 'https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT ST_ASTEXT(wkb_geometry AS wkt) ST_ASGML(wkb_geometry) AS gml FROM random_points_1024_CSV limit 5'`` 
+Example: select geometry as Well Known Text and GML
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``curl --location 'https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT ST_ASTEXT(wkb_geometry) AS wkt, ST_ASGML(wkb_geometry) AS gml FROM random_points_1024_csv limit 5'`` 
 
 To select different representations of the geometries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -41,6 +44,11 @@ Overlays to be able to join tables
 - ST_UNION. See https://postgis.net/docs/ST_Union.html
 - ST_WITHIN. See https://postgis.net/docs/ST_Within.html
 
+Example: count the number of points within each municipality
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``curl --location 'https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT a.gm_code, a.gm_naam, ST_ASTEXT(a.wkb_geometry) AS the_geom, AVG(b.random_amount), COUNT(b.random_amount) FROM gemeenten_2022_v2_zip AS a JOIN random_points_1024_gpkg AS b ON a.h2o %3D %27NEE%27 AND ST_INTERSECTS(a.wkb_geometry, b.wkb_geometry) GROUP BY a.gm_code, a.gm_naam, ST_ASTEXT(a.wkb_geometry)'``
+
 To be able to create geometries to be used in overlays
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -50,7 +58,3 @@ To be able to create geometries to be used in overlays
 - ST_GEOMFROMTEXT. Create geometry from Well Known Text (WKT). See https://postgis.net/docs/ST_GeomFromText.html
 - ST_SETSRID. Geometries created using the ST_GEOMFROMGEOJSON and ST_GEOMFROMTEXT functions will not have spatial reference information (EPSG code). As a consequence, spatial queries will fail due to a mismatch between the coordinate reference systems. Use this function to attach an EPSG code to the geometry. See https://postgis.net/docs/ST_SetSRID.html. 
 - ST_TRANSFORM. To transform geometries from one coordinate reference system to another to avoid a mismatch between coordinate reference systems when doing overlays. See https://postgis.net/docs/ST_Transform.html. 
-  
-Examples
-~~~~~~~~
-''https://tst-ckan.dataplatform.nl/api/3/action/datastore_search_sql?sql=SELECT%20*%20from%20airview_measurement_cuesgoom%20WHERE%20recording_timestamp%20%3E%20%272023-06-01%27''
