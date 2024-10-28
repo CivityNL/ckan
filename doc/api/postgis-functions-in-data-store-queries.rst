@@ -29,6 +29,10 @@ Example: select geometry as Well Known Text and GML
 To select different representations of the geometries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+External hyperlinks, like Python_.
+
+.. _Python: https://www.python.org/ 
+
 - ST_BUFFER. See https://postgis.net/docs/ST_Buffer.html
 - ST_CENTROID. See https://postgis.net/docs/ST_Centroid.html
 - ST_CLOSESTPOINT. See https://postgis.net/docs/ST_ClosestPoint.html
