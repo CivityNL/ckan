@@ -69,7 +69,7 @@ Overlays to be able to join tables
 Example: 
 ------------------------------------------------------------
 
-Count the number of points within each municipality: `click <https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT%20a.gm_code%2C%20a.gm_naam%2C%20ST_ASTEXT(a.wkb_geometry)%20AS%20the_geom%2C%20AVG(b.random_amount)%2C%20COUNT(b.random_amount)%20FROM%20gemeenten_2022_v2_zip%20AS%20a%20JOIN%20random_points_1024_gpkg%20AS%20b%20ON%20a.h2o%20%3D%20%27NEE%27%20AND%20ST_INTERSECTS(a.wkb_geometry%2C%20b.wkb_geometry)%20GROUP%20BY%20a.gm_code%2C%20a.gm_naam%2C%20ST_ASTEXT(a.wkb_geometry)>`_
+Count the number of points within each municipality: `click <https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT%20a.gm_code%2C%20a.gm_naam%2C%20AVG(b.random_amount)%2C%20COUNT(b.random_amount)%20FROM%20gemeenten_2022_v2_zip%20AS%20a%20JOIN%20random_points_1024_gpkg%20AS%20b%20ON%20a.h2o%20%3D%20%27NEE%27%20AND%20ST_INTERSECTS(a.wkb_geometry%2C%20b.wkb_geometry)%20GROUP%20BY%20a.gm_code%2C%20a.gm_naam%20ORDER%20BY%20a.gm_naam>`_
 
 To be able to create geometries to be used in overlays
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
