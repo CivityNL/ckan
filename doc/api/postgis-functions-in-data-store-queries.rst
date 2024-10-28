@@ -33,9 +33,13 @@ External hyperlinks, like Python_.
 
 .. _Python: https://www.python.org/ 
 
-- ST_BUFFER. See https://postgis.net/docs/ST_Buffer.html
-- ST_CENTROID. See https://postgis.net/docs/ST_Centroid.html
-- ST_CLOSESTPOINT. See https://postgis.net/docs/ST_ClosestPoint.html
+- ST_BUFFER_. See https://postgis.net/docs/ST_Buffer.html
+- ST_CENTROID_. See https://postgis.net/docs/ST_Centroid.html
+- ST_CLOSESTPOINT_. See https://postgis.net/docs/ST_ClosestPoint.html
+
+.. _ST_BUFFER: https://postgis.net/docs/ST_Buffer.html
+.. _ST_CENTROID: https://postgis.net/docs/ST_Centroid.html
+.. _ST_CLOSESTPOINT: https://postgis.net/docs/ST_ClosestPoint.html
 
 Overlays to be able to join tables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
