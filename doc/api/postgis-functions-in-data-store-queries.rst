@@ -16,10 +16,15 @@ functions can be used and provides examples on how to use them.
 To convert to text formats
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-- ST_ASEWKT - Well Known Text, with CRS information. See https://postgis.net/docs/ST_AsEWKT.html
-- ST_ASGEOJSON - GeoJSON. See https://postgis.net/docs/ST_AsGeoJSON.html
-- ST_ASGML - GML. See https://postgis.net/docs/ST_AsGML.html
-- ST_ASTEXT - Well Known Text, without CRS information. See https://postgis.net/docs/ST_AsText.html
+- ST_ASEWKT_. - Well Known Text, with CRS information
+- ST_ASGEOJSON_. - GeoJSON
+- ST_ASGML_. - GML
+- ST_ASTEXT_. - Well Known Text, without CRS information
+
+.. _ST_ASEWKT: Well Known Text, with CRS information. See https://postgis.net/docs/ST_AsEWKT.html
+.. _ST_ASGEOJSON: GeoJSON. See https://postgis.net/docs/ST_AsGeoJSON.html
+.. _ST_ASGML: GML. See https://postgis.net/docs/ST_AsGML.html
+.. _ST_ASTEXT: Well Known Text, without CRS information. See https://postgis.net/docs/ST_AsText.html
 
 Example: select geometry as Well Known Text and GML
 ---------------------------------------------------
@@ -29,28 +34,37 @@ Example: select geometry as Well Known Text and GML
 To select different representations of the geometries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-External hyperlinks, like Python_.
-
-.. _Python: https://www.python.org/ 
-
-- ST_BUFFER_. See https://postgis.net/docs/ST_Buffer.html
-- ST_CENTROID_. See https://postgis.net/docs/ST_Centroid.html
-- ST_CLOSESTPOINT_. See https://postgis.net/docs/ST_ClosestPoint.html
+- ST_BUFFER_. 
+- ST_CENTROID_. 
+- ST_CLOSESTPOINT_. 
 
 .. _ST_BUFFER: https://postgis.net/docs/ST_Buffer.html
 .. _ST_CENTROID: https://postgis.net/docs/ST_Centroid.html
 .. _ST_CLOSESTPOINT: https://postgis.net/docs/ST_ClosestPoint.html
 
+Example: select GML representation of a point, with spatial reference ID and a 1000 meter buffer
+------------------------------------------------------------------------------------------------
+
+``curl --location 'https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT ST_ASGML(ST_BUFFER(ST_SETSRID(ST_GEOMFROMTEXT('POINT(142735.75 470715.91)'), 28992), 1000)) AS buffer_geom'``
+
 Overlays to be able to join tables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- ST_CONTAINS. See https://postgis.net/docs/ST_Contains.html
-- ST_COVERS. See https://postgis.net/docs/ST_Covers.html
-- ST_DFULLYWITHIN. See https://postgis.net/docs/ST_DFullyWithin.html
-- ST_DWITHIN. See https://postgis.net/docs/ST_DWithin.html
-- ST_INTERSECTS. See https://postgis.net/docs/ST_Intersects.html
-- ST_UNION. See https://postgis.net/docs/ST_Union.html
-- ST_WITHIN. See https://postgis.net/docs/ST_Within.html
+- ST_CONTAINS_.
+- ST_COVERS_.
+- ST_DFULLYWITHIN_.
+- ST_DWITHIN_.
+- ST_INTERSECTS_.
+- ST_UNION_.
+- ST_WITHIN_.
+
+.. _ST_CONTAINS: https://postgis.net/docs/ST_Contains.html
+.. _ST_COVERS: https://postgis.net/docs/ST_Covers.html
+.. _ST_DFULLYWITHIN: https://postgis.net/docs/ST_DFullyWithin.html
+.. _ST_DWITHIN: https://postgis.net/docs/ST_DWithin.html
+.. _ST_INTERSECTS: https://postgis.net/docs/ST_Intersects.html
+.. _ST_UNION: https://postgis.net/docs/ST_Union.html
+.. _ST_WITHIN: https://postgis.net/docs/ST_Within.html
 
 Example: count the number of points within each municipality
 ------------------------------------------------------------
@@ -66,3 +80,8 @@ To be able to create geometries to be used in overlays
 - ST_GEOMFROMTEXT. Create geometry from Well Known Text (WKT). See https://postgis.net/docs/ST_GeomFromText.html
 - ST_SETSRID. Geometries created using the ST_GEOMFROMGEOJSON and ST_GEOMFROMTEXT functions will not have spatial reference information (EPSG code). As a consequence, spatial queries will fail due to a mismatch between the coordinate reference systems. Use this function to attach an EPSG code to the geometry. See https://postgis.net/docs/ST_SetSRID.html. 
 - ST_TRANSFORM. To transform geometries from one coordinate reference system to another to avoid a mismatch between coordinate reference systems when doing overlays. See https://postgis.net/docs/ST_Transform.html. 
+
+Example: create a point and set the spatial reference ID
+--------------------------------------------------------
+
+``curl --location 'https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT%20ST_SETSRID(ST_GEOMFROMTEXT(%27POINT(142735.75%20470715.91)%27)%2C%2028992)%20AS%20geom'``
