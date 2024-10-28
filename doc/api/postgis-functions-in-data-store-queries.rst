@@ -29,7 +29,7 @@ To convert to text formats
 Example: select geometry as Well Known Text and GML
 ---------------------------------------------------
 
-``curl --location 'https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT ST_ASTEXT(wkb_geometry) AS wkt, ST_ASGML(wkb_geometry) AS gml FROM random_points_1024_csv limit 5'`` 
+`select geometry as Well Known Text and GML <https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT ST_ASTEXT(wkb_geometry) AS wkt, ST_ASGML(wkb_geometry) AS gml FROM random_points_1024_csv limit 5>_ 
 
 To select different representations of the geometries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
