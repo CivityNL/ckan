@@ -16,10 +16,10 @@ functions can be used and provides examples on how to use them.
 To convert to text formats
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-- ST_ASEWKT_. - Well Known Text, with CRS information
-- ST_ASGEOJSON_. - GeoJSON
-- ST_ASGML_. - GML
-- ST_ASTEXT_. - Well Known Text, without CRS information
+- Well Known Text, with CRS information: ST_ASEWKT_.
+- GeoJSON: ST_ASGEOJSON_. 
+- GML: ST_ASGML_.
+- Well Known Text, without CRS information: ST_ASTEXT_.
 
 .. _ST_ASEWKT: Well Known Text, with CRS information. See https://postgis.net/docs/ST_AsEWKT.html
 .. _ST_ASGEOJSON: GeoJSON. See https://postgis.net/docs/ST_AsGeoJSON.html
