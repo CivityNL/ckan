@@ -9,7 +9,7 @@ PostGIS functions in data store queries
 Introduction
 ~~~~~~~~~~~~
 
-Using the `CKAN data store API <https://docs.ckan.org/en/2.9/maintaining/datastore.html#the-datastore-api>`_., queries against data in the CKAN data store can be executed. 
+Using the `CKAN data store API <https://docs.ckan.org/en/2.9/maintaining/datastore.html#the-datastore-api>`_, queries against data in the CKAN data store can be executed. 
 It is possible to use some PostGIS functions in those queries. This document describes which 
 functions can be used and provides examples on how to use them. 
 
