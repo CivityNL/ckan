@@ -69,17 +69,24 @@ Overlays to be able to join tables
 Example: count the number of points within each municipality
 ------------------------------------------------------------
 
-``curl --location 'https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT a.gm_code, a.gm_naam, ST_ASTEXT(a.wkb_geometry) AS the_geom, AVG(b.random_amount), COUNT(b.random_amount) FROM gemeenten_2022_v2_zip AS a JOIN random_points_1024_gpkg AS b ON a.h2o %3D %27NEE%27 AND ST_INTERSECTS(a.wkb_geometry, b.wkb_geometry) GROUP BY a.gm_code, a.gm_naam, ST_ASTEXT(a.wkb_geometry)'``
+``curl --location 'https://tst-ckan-dataplatform-nl.dataplatform.nl/api/action/datastore_search_sql?sql=SELECT a.gm_code, a.gm_naam, ST_ASTEXT(a.wkb_geometry) AS the_geom, AVG(b.random_amount), COUNT(b.random_amount) FROM gemeenten_2022_v2_zip AS a JOIN random_points_1024_gpkg AS b ON a.h2o = 'NEE' AND ST_INTERSECTS(a.wkb_geometry, b.wkb_geometry) GROUP BY a.gm_code, a.gm_naam, ST_ASTEXT(a.wkb_geometry)'``
 
 To be able to create geometries to be used in overlays
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- ST_GEOMFROMEWKT. Create geometry from Well Known Text (WKT) with spatial reference information. See https://postgis.net/docs/ST_GeomFromEWKT.html
-- ST_GEOMFROMGEOJSON. Create geometry from GeoJSON. See https://postgis.net/docs/ST_GeomFromGeoJSON.html
-- ST_GEOMFROMGML. Create geometry from Geography Markup Language (GML). See https://postgis.net/docs/ST_GeomFromGML.html
-- ST_GEOMFROMTEXT. Create geometry from Well Known Text (WKT). See https://postgis.net/docs/ST_GeomFromText.html
-- ST_SETSRID. Geometries created using the ST_GEOMFROMGEOJSON and ST_GEOMFROMTEXT functions will not have spatial reference information (EPSG code). As a consequence, spatial queries will fail due to a mismatch between the coordinate reference systems. Use this function to attach an EPSG code to the geometry. See https://postgis.net/docs/ST_SetSRID.html. 
-- ST_TRANSFORM. To transform geometries from one coordinate reference system to another to avoid a mismatch between coordinate reference systems when doing overlays. See https://postgis.net/docs/ST_Transform.html. 
+- Create geometry from Well Known Text (WKT) with spatial reference information: ST_GEOMFROMEWKT_. 
+- Create geometry from GeoJSON.ST_GEOMFROMGEOJSON_. 
+- Create geometry from Geography Markup Language (GML): ST_GEOMFROMGML_.
+- Create geometry from Well Known Text (WKT): ST_GEOMFROMTEXT_. 
+- Geometries created using the ST_GEOMFROMGEOJSON and ST_GEOMFROMTEXT functions will not have spatial reference information (EPSG code). As a consequence, spatial queries will fail due to a mismatch between the coordinate reference systems. Use this function to attach an EPSG code to the geometry: ST_SETSRID_. 
+- To transform geometries from one coordinate reference system to another to avoid a mismatch between coordinate reference systems when doing overlays: ST_TRANSFORM_.  
+
+.. _ST_GEOMFROMEWKT: https://postgis.net/docs/ST_GeomFromEWKT.html
+.. _ST_GEOMFROMGEOJSON: https://postgis.net/docs/ST_GeomFromGeoJSON.html
+.. _ST_GEOMFROMGML: https://postgis.net/docs/ST_GeomFromGML.html
+.. _ST_GEOMFROMTEXT: https://postgis.net/docs/ST_GeomFromText.html
+.. _ST_SETSRID: https://postgis.net/docs/ST_SetSRID.html. 
+.. _ST_TRANSFORM: https://postgis.net/docs/ST_Transform.html. 
 
 Example: create a point and set the spatial reference ID
 --------------------------------------------------------
