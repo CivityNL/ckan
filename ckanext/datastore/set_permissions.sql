@@ -82,7 +82,12 @@ AS $body$
         NEW._full_text := (
             SELECT to_tsvector(string_agg(value, ' '))
             FROM json_each_text(row_to_json(NEW.*))
-            WHERE key NOT LIKE '\_%');
+            WHERE key NOT LIKE '\_%' AND key IN (
+            	SELECT column_name
+				      FROM INFORMATION_SCHEMA.columns
+      				WHERE table_schema = TG_TABLE_SCHEMA AND table_name = TG_TABLE_NAME and data_type in ('character varying', 'character', 'text')
+            )
+        );
         RETURN NEW;
     END;
 $body$ LANGUAGE plpgsql;
