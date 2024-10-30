@@ -9,7 +9,7 @@ Changelog
 
 .. towncrier release notes start
 
-v.2.9.11+civity.3 TBD
+v.2.9.11+civity.3 2024-10-28
 ===================
 
 Major features
