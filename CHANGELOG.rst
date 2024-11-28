@@ -20,7 +20,8 @@ Bugfixes
 
 Minor changes
 -------------
-- Return versions for extensions with ``status_show`` if called with `ckan.hide_version` disabled (default) or a sysadmin
+- Return versions for extensions with ``status_show`` if called with `ckan.hide_version` disabled (default) or as a sysadmin
+- Facets can now be given as a dict which keys will be mapped to the facet_list snippet. (`CIVDEV-1195 <https://civity.atlassian.net/browse/CIVDEV-1195>`_)
 
 v.2.9.11+civity.3 2024-10-28
 ===================
