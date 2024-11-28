@@ -2819,8 +2819,8 @@ class TestStatusShow(object):
             assert isinstance(status[u"extensions"], dict)
             assert status[u"extensions"].keys() == [u"ckan"]
             assert isinstance(status[u"extensions"][u"ckan"], dict)
-            assert status[u"extensions"][u"ckan"]["version"] == __version__
-            assert status[u"extensions"][u"ckan"]["plugins"] == plugins
+            assert status[u"extensions"][u"ckan"][u"version"] == __version__
+            assert status[u"extensions"][u"ckan"][u"plugins"] == plugins
 
         assert status[u"site_url"] == u"http://test.ckan.net"
         assert status[u"site_title"] == u"CKAN"
@@ -2844,7 +2844,7 @@ class TestStatusShow(object):
     @pytest.mark.ckan_config('ckan.hide_version', True)
     def test_status_show_version_to_sysadmins(self):
         sysadmin = factories.Sysadmin()
-        status = helpers.call_action("status_show", context={"user": sysadmin["name"]})
+        status = helpers.call_action(u"status_show", context={u"user": sysadmin[u"name"]})
         self._test_status_show(status, includes_version=True)
 
 
