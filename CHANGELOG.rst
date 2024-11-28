@@ -9,6 +9,19 @@ Changelog
 
 .. towncrier release notes start
 
+v.2.9.11-civity.4 TBD
+===================
+
+Major features
+--------------
+
+Bugfixes
+--------
+
+Minor changes
+-------------
+- Return versions for extensions with ``status_show`` if called with `ckan.hide_version` disabled (default) or a sysadmin
+
 v.2.9.11+civity.3 2024-10-28
 ===================
 
