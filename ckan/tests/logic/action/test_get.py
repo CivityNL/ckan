@@ -2804,21 +2804,48 @@ class TestFollow(object):
         assert followee_list[0]["display_name"] == "Environment"
 
 
+@pytest.mark.ckan_config("ckan.plugins", "stats")
+@pytest.mark.usefixtures("clean_db", "with_plugins", "with_request_context")
 class TestStatusShow(object):
-    @pytest.mark.ckan_config("ckan.plugins", "stats")
-    @pytest.mark.usefixtures("clean_db", "with_plugins", "with_request_context")
-    def test_status_show(self):
 
-        status = helpers.call_action(u"status_show")
+    def _test_status_show(status, includes_version=False):
+        plugins = [u"stats"]
 
-        assert status[u"ckan_version"] == __version__
+        if not includes_version:
+            assert u"ckan_version" not in status, u"Should have skipped CKAN version"
+            assert u"extensions" not in status, u"Should have skipped extension versions"
+        else:
+            assert status[u"ckan_version"] == __version__
+            assert isinstance(status[u"extensions"], dict)
+            assert status[u"extensions"].keys() == [u"ckan"]
+            assert isinstance(status[u"extensions"][u"ckan"], dict)
+            assert status[u"extensions"][u"ckan"]["version"] == __version__
+            assert status[u"extensions"][u"ckan"]["plugins"] == plugins
+
         assert status[u"site_url"] == u"http://test.ckan.net"
         assert status[u"site_title"] == u"CKAN"
         assert status[u"site_description"] == u""
         assert status[u"locale_default"] == u"en"
 
-        assert type(status[u"extensions"]) == list
-        assert status[u"extensions"] == [u"stats"]
+        assert isinstance(status[u"plugins"], list)
+        assert status[u"plugins"] == plugins
+
+    def test_status_show(self):
+        status = helpers.call_action(u"status_show")
+        self._test_status_show(status, includes_version=True)
+
+
+    @pytest.mark.ckan_config('ckan.hide_version', True)
+    def test_status_show_hiding_version(self):
+        status = helpers.call_action(u"status_show")
+        self._test_status_show(status, includes_version=False)
+
+
+    @pytest.mark.ckan_config('ckan.hide_version', True)
+    def test_status_show_version_to_sysadmins(self):
+        sysadmin = factories.Sysadmin()
+        status = helpers.call_action("status_show", context={"user": sysadmin["name"]})
+        self._test_status_show(status, includes_version=True)
 
 
 class TestJobList(helpers.FunctionalRQTestBase):
