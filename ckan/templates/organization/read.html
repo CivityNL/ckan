@@ -38,8 +38,13 @@
   <div class="filters">
     <div>
       {% for facet in facet_titles %}
-        {{ h.snippet('snippets/facet_list.html', title=facet_titles[facet], name=facet, extras={'id':group_dict.id}) }}
-      {% endfor %}
+        {% set _facet = facet_titles[facet] %}
+        {% if _facet is mapping %}
+          {{ h.snippet('snippets/facet_list.html', name=facet, title=_facet['title'], label_function=_facet['label_function'], if_empty=_facet['if_empty'], count_label=_facet['count_label'], alternative_url=_facet['alternative_url'], hide_empty=_facet['hide_empty'], within_tertiary=_facet['within_tertiary'], extras={'id':group_dict.id}) }}
+        {% else %}
+          {{ h.snippet('snippets/facet_list.html', title=_facet, name=facet, extras={'id':group_dict.id}) }}
+        {% endif %}
+      {% endfor %}      
     </div>
     <a class="close no-text hide-filters"><i class="fa fa-times-circle"></i><span class="text">close</span></a>
   </div>
