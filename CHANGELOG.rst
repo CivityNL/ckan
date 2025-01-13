@@ -9,6 +9,14 @@ Changelog
 
 .. towncrier release notes start
 
+v.2.9.11-civity.4 2025-01-13
+===================
+
+Minor changes
+-------------
+- Return versions for extensions with ``status_show`` if called with `ckan.hide_version` disabled (default) or as a sysadmin
+- Updated templates to map facets to the facet_list snippet if they are given as a dict (see: ``group/read.html``, ``organization/bulk_process.html``, ``organization/read.html``, and ``package/search.html``). (`CIVDEV-1195 <https://civity.atlassian.net/browse/CIVDEV-1195>`_)
+
 v.2.9.11+civity.3 2024-10-28
 ===================
 

@@ -2418,19 +2418,62 @@ def get_site_user(context, data_dict):
 def status_show(context, data_dict):
     '''Return a dictionary with information about the site's configuration.
 
+    :returns: A dictionary with the following keys:
+
+        ``'site_title'``
+            The value for the 'ckan.site_title' configuration option
+
+        ``'site_description'``
+            The value for the 'ckan.site_description' configuration option
+
+        ``'site_url'``
+            The value for the 'ckan.site_url' configuration option
+
+        ``'error_emails_to'``
+            The value for the 'ckan.email_to' configuration option
+
+        ``'locale_default'``
+            The value for the 'ckan.locale_default' configuration option
+
+        ``'plugins'``
+            List of enabled plugins as defined in the 'ckan.plugins' configuration option
+
+        The following keys are only return when accessed by a sysadmin user or if versions are allowed by the 'ckan.hide_version' configuration option:
+
+        ``'ckan_version'``
+            The version of CKAN
+
+        ``'extensions'``
+            List of extensions based on the enabled plugins including their respective verion and the plugins belonging to this extension
+                        
     :rtype: dictionary
 
     '''
     _check_access('status_show', context, data_dict)
-    return {
+    plugins = config.get('ckan.plugins').split()
+
+    status = {
         'site_title': config.get('ckan.site_title'),
         'site_description': config.get('ckan.site_description'),
         'site_url': config.get('ckan.site_url'),
-        'ckan_version': ckan.__version__,
         'error_emails_to': config.get('email_to'),
         'locale_default': config.get('ckan.locale_default'),
-        'extensions': config.get('ckan.plugins').split(),
+        'plugins': plugins,
     }
+
+    if not config.get('ckan.hide_version') or authz.is_sysadmin(context['user']):
+        from pkg_resources import iter_entry_points
+        entry_points = iter_entry_points(group='ckan.plugins')
+        extensions = {}
+        for entry_point in entry_points:
+            if entry_point.name in plugins:
+                if entry_point.dist.project_name not in extensions:
+                    extensions[entry_point.dist.project_name] = {'version': entry_point.dist.version, 'plugins': []}
+                extensions[entry_point.dist.project_name]['plugins'].append(entry_point.name)        
+        status['ckan_version'] = ckan.__version__
+        status['extensions'] = extensions
+
+    return status
 
 
 def vocabulary_list(context, data_dict):
