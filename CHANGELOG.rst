@@ -7,7 +7,13 @@
 Changelog
 ---------
 
-.. towncrier release notes start
+v.2.9.11-civity-5 ???
+===================
+
+Minor changes
+-------------
+- Updated `setuptools` to `63.3.1` to avoid issues with package version names. (`CIVDEV-1378 <https://civity.atlassian.net/browse/CIVDEV-1378>`_)
+
 
 v.2.9.11-civity.4 2025-01-13
 ===================
