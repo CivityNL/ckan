@@ -9,6 +9,13 @@ Changelog
 
 .. towncrier release notes start
 
+v.2.9.11-civity.5 TBD
+===================
+
+Minor changes
+-------------
+- Added 4 additional PostGIS functions to the [allowed functions](ckanext/datastore/allowed_functions.txt) of the DataStore plugin: `st_area`, `st_distance`, `st_length`, and `st_perimeter`. (`CIVDEV-1472 <https://civity.atlassian.net/browse/CIVDEV-1472>`_)
+
 v.2.9.11-civity.4 2025-01-13
 ===================
 
