@@ -234,6 +234,7 @@ sind
 slope
 split_part
 sqrt
+st_area
 st_asewkt
 st_asgeojson
 st_asgml
@@ -244,12 +245,15 @@ st_closestpoint
 st_contains
 st_covers
 st_dfullywithin
+st_distance
 st_dwithin
 st_geomfromewkt
 st_geomfromgeojson
 st_geomfromgml
 st_geomfromtext
 st_intersects
+st_length
+st_perimeter
 st_setsrid
 st_transform
 st_union
