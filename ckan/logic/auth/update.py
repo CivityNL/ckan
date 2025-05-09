@@ -42,6 +42,7 @@ def package_update(context, data_dict):
             # if org-level auth failed, check dataset-level auth
             # (ie if user is a collaborator)
             user_obj = model.User.get(user)
+            # TODO CIVDEV-1527: convert to permissions instead of capacaties
             if user_obj:
                 success = authz.user_is_collaborator_on_dataset(
                     user_obj.id, package.id, ['admin', 'editor'])

@@ -602,6 +602,7 @@ def member_create(context, data_dict=None):
         filter(model.Member.state == 'active').first()
     if member:
         user_obj = model.User.get(user)
+        # TODO CIVDEV-1527: convert to permissions instead of capacaties
         if member.table_name == u'user' and \
                 member.table_id == user_obj.id and \
                 member.capacity == u'admin' and \
@@ -776,6 +777,7 @@ def _group_or_org_create(context, data_dict, is_org=False):
 
     # creator of group/org becomes an admin
     # this needs to be after the repo.commit or else revisions break
+    # TODO CIVDEV-1527: convert to permissions instead of capacaties
     member_dict = {
         'id': group.id,
         'object': user_id,

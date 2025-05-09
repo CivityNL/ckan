@@ -57,6 +57,7 @@
       {% endif %}
     </div>
 
+  # TODO CIVDEV-1527: convert to permissions instead of capacaties
     {% if user and user.name == c.user and user_role == 'admin' %}
       {% set format_attrs = {'data-module': 'autocomplete', 'disabled': 'disabled'} %}
       {{ form.select('role', label=_('Role'), options=roles, selected=user_role, error='', attrs=format_attrs) }}

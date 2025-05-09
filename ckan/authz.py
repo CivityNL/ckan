@@ -177,6 +177,7 @@ def get_group_or_org_admin_ids(group_id):
     if not group_id:
         return []
     group_id = model.Group.get(group_id).id
+    # TODO CIVDEV-1527: convert to permissions instead of capacaties
     q = model.Session.query(model.Member) \
         .filter(model.Member.group_id == group_id) \
         .filter(model.Member.table_name == 'user') \
@@ -231,8 +232,10 @@ def is_authorized(action, context, data_dict=None):
 
 def get_collaborator_capacities():
     if check_config_permission('allow_admin_collaborators'):
+    # TODO CIVDEV-1527: get list from capacities
         return ('admin', 'editor', 'member')
     else:
+    # TODO CIVDEV-1527: get list from capacities
         return ('editor', 'member')
 
 
@@ -470,6 +473,7 @@ def can_manage_collaborators(package_id, user_id):
         return True
 
     # Check if user is a collaborator with admin role
+    # TODO CIVDEV-1527: convert to permissions instead of capacaties
     return user_is_collaborator_on_dataset(user_id, pkg.id, 'admin')
 
 

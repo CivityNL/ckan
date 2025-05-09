@@ -680,6 +680,7 @@ def organization_list_for_user(context, data_dict):
         .filter(model.Group.is_organization == True) \
         .filter(model.Group.state == 'active')
 
+    # TODO CIVDEV-1527: convert to permissions instead of capacaties
     if sysadmin:
         orgs_and_capacities = [(org, 'admin') for org in orgs_q.all()]
     else:
@@ -2445,7 +2446,7 @@ def status_show(context, data_dict):
 
         ``'extensions'``
             List of extensions based on the enabled plugins including their respective verion and the plugins belonging to this extension
-                        
+
     :rtype: dictionary
 
     '''
@@ -2469,7 +2470,7 @@ def status_show(context, data_dict):
             if entry_point.name in plugins:
                 if entry_point.dist.project_name not in extensions:
                     extensions[entry_point.dist.project_name] = {'version': entry_point.dist.version, 'plugins': []}
-                extensions[entry_point.dist.project_name]['plugins'].append(entry_point.name)        
+                extensions[entry_point.dist.project_name]['plugins'].append(entry_point.name)
         status['ckan_version'] = ckan.__version__
         status['extensions'] = extensions
 
@@ -3483,6 +3484,7 @@ def member_roles_list(context, data_dict):
     '''
     group_type = data_dict.get('group_type', 'organization')
     roles_list = authz.roles_list()
+    # TODO CIVDEV-1527: get list from logic
     if group_type == 'group':
         roles_list = [role for role in roles_list
                       if role['value'] != 'editor']

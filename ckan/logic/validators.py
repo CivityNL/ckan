@@ -56,6 +56,7 @@ def owner_org_validator(key, data, errors, context):
     if (authz.check_config_permission('allow_dataset_collaborators')
             and not authz.check_config_permission('allow_collaborators_to_change_owner_org')):
 
+        # TODO CIVDEV-1527: convert to permissions instead of capacaties
         if package and user and not user.sysadmin:
             is_collaborator = authz.user_is_collaborator_on_dataset(
                 user.id, package.id, ['admin', 'editor'])

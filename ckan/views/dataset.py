@@ -1345,6 +1345,7 @@ class CollaboratorEditView(MethodView):
             return base.abort(404, _(u'Resource not found'))
 
         user = request.params.get(u'user_id')
+        # TODO CIVDEV-1527: define default capacity
         user_capacity = u'member'
 
         if user:
@@ -1356,6 +1357,7 @@ class CollaboratorEditView(MethodView):
             user = get_action(u'user_show')(context, {u'id': user})
 
         capacities = []
+        # TODO CIVDEV-1527: fill capacities from logic
         if authz.check_config_permission(u'allow_admin_collaborators'):
             capacities.append({u'name': u'admin', u'value': u'admin'})
         capacities.extend([
