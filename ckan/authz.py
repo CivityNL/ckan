@@ -16,6 +16,7 @@ import ckan.model as model
 from ckan.common import _, g
 
 import ckan.lib.maintain as maintain
+from ckan.plugins.interfaces import IAuthorization
 
 log = getLogger(__name__)
 
@@ -114,12 +115,12 @@ class AuthFunctions:
                 else:
                     # fallback to chaining off the builtin auth function
                     prev_func = self._functions[name]
-                
+
                 new_func = (functools.partial(func, prev_func))
                 # persisting attributes to the new partial function
                 for attribute, value in six.iteritems(func.__dict__):
                     setattr(new_func, attribute, value)
-                
+
                 fetched_auth_functions[name] = new_func
 
         # Use the updated ones in preference to the originals.
@@ -228,14 +229,6 @@ def is_authorized(action, context, data_dict=None):
         raise ValueError(_('Authorization function not found: %s' % action))
 
 
-# these are the permissions that roles have
-ROLE_PERMISSIONS = OrderedDict([
-    ('admin', ['admin', 'membership']),
-    ('editor', ['read', 'delete_dataset', 'create_dataset', 'update_dataset', 'manage_group']),
-    ('member', ['read', 'manage_group']),
-])
-
-
 def get_collaborator_capacities():
     if check_config_permission('allow_admin_collaborators'):
         return ('admin', 'editor', 'member')
@@ -243,27 +236,14 @@ def get_collaborator_capacities():
         return ('editor', 'member')
 
 
-def _trans_role_admin():
-    return _('Admin')
-
-
-def _trans_role_editor():
-    return _('Editor')
-
-
-def _trans_role_member():
-    return _('Member')
-
-
 def trans_role(role):
-    module = sys.modules[__name__]
-    return getattr(module, '_trans_role_%s' % role)()
+    return get_role_permissions()[role]['label']
 
 
 def roles_list():
     ''' returns list of roles for forms '''
     roles = []
-    for role in ROLE_PERMISSIONS:
+    for role in get_role_permissions():
         roles.append(dict(text=trans_role(role), value=role))
     return roles
 
@@ -271,16 +251,49 @@ def roles_list():
 def roles_trans():
     ''' return dict of roles with translation '''
     roles = {}
-    for role in ROLE_PERMISSIONS:
+    for role in get_role_permissions():
         roles[role] = trans_role(role)
     return roles
 
 
+DEFAULT_ROLE_PERMISSIONS = OrderedDict([
+    ('admin', {
+        'permissions': ['admin', 'membership'],
+        'label': 'admin',
+        'description': 'admin',
+    }),
+    ('editor', {
+        'permissions': ['read', 'delete_dataset', 'create_dataset', 'update_dataset', 'manage_group'],
+        'label': 'editor',
+        'description': 'editor'
+    }),
+    ('member', {
+        'permissions': ['read', 'manage_group'],
+        'label': 'member',
+        'description': 'member'
+    }),
+])
+ROLE_PERMISSIONS = None
+
+
+def get_role_permissions():
+    global ROLE_PERMISSIONS
+    if ROLE_PERMISSIONS is None:
+        print("ckan.authz.get_role_permissions -> setting ROLE_PERMISSIONS")
+        ROLE_PERMISSIONS = DEFAULT_ROLE_PERMISSIONS
+        for plugin in p.PluginImplementations(IAuthorization):
+            ROLE_PERMISSIONS = plugin.get_roles(ROLE_PERMISSIONS)
+    else:
+        print("ckan.authz.get_role_permissions -> returning ROLE_PERMISSIONS")
+    return ROLE_PERMISSIONS
+
+
 def get_roles_with_permission(permission):
     ''' returns the roles with the permission requested '''
+    role_permissions = get_role_permissions()
     roles = []
-    for role in ROLE_PERMISSIONS:
-        permissions = ROLE_PERMISSIONS[role]
+    for role in role_permissions:
+        permissions = role_permissions[role]['permissions']
         if permission in permissions or 'admin' in permissions:
             roles.append(role)
     return roles
@@ -336,8 +349,9 @@ def _has_user_permission_for_groups(user_id, permission, group_ids,
         q = q.filter(model.Member.capacity == capacity)
     # see if any role has the required permission
     # admin permission allows anything for the group
+    role_permissions = get_role_permissions()
     for row in q.all():
-        perms = ROLE_PERMISSIONS.get(row.capacity, [])
+        perms = role_permissions.get(row.capacity, {}).get('permissions', [])
         if 'admin' in perms or permission in perms:
             return True
     return False

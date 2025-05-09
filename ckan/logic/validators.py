@@ -774,7 +774,7 @@ def user_name_exists(user_name, context):
 
 
 def role_exists(role, context):
-    if role not in authz.ROLE_PERMISSIONS:
+    if role not in authz.get_role_permissions():
         raise Invalid(_('role does not exist.'))
     return role
 
