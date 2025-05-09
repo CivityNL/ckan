@@ -9,6 +9,18 @@ Changelog
 
 .. towncrier release notes start
 
+v.2.9.11-civity.6
+=================
+
+Major features
+--------------
+
+Minor changes
+-------------
+
+Bugfixes
+--------
+
 v.2.9.11-civity.5 TBD
 ===================
 
