@@ -2042,3 +2042,11 @@ class IClick(Interface):
         :rtype: list of function objects
         '''
         return []
+
+
+class IAuthorization(Interface):
+    u'''
+    Allow extensions to define click commands.
+    '''
+    def get_roles(self, roles):
+        return roles
