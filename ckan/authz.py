@@ -259,18 +259,33 @@ def roles_trans():
 DEFAULT_ROLE_PERMISSIONS = OrderedDict([
     ('admin', {
         'permissions': ['admin', 'membership'],
-        'label': 'admin',
-        'description': 'admin',
+        'label': _('Admin'),
+        # organization description
+        'description': _('Can add/edit and delete datasets, as well as manage organization members.'),
+        # group description
+        # 'description': _('Can edit group information, as well as manage organization members.'),
+        # dataset description
+        # 'description':
+        #     _('In addition to managing the dataset, admins can add and remove collaborators from a dataset.'),
     }),
     ('editor', {
         'permissions': ['read', 'delete_dataset', 'create_dataset', 'update_dataset', 'manage_group'],
-        'label': 'editor',
-        'description': 'editor'
+        'label': _('Editor'),
+        # organization
+        'description': _('Can add and edit datasets, but not manage organization members.'),
+        # group description
+        # 'description': None,
+        # dataset description
+        # 'description': _('Editors can edit the dataset and its resources, as well accessing the dataset if private.'),
     }),
     ('member', {
         'permissions': ['read', 'manage_group'],
-        'label': 'member',
-        'description': 'member'
+        'label': _('Member'),
+        'description': _('Can view the organization\'s private datasets, but not add new datasets.'),
+        # group description
+        # 'description': _('Can add/remove datasets from groups.'),
+        # dataset description
+        # 'description': _('Members can access the dataset if private, but not edit it.'),
     }),
 ])
 ROLE_PERMISSIONS = None
