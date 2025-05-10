@@ -1,0 +1,225 @@
+flowchart LR
+
+    classDef danger fill: #f2dede, stroke: #a94442, stroke-width: 1px, color: #a94442
+    classDef warning fill: #fcf8e3, stroke: #faebcc, stroke-width: 1px, color: #8a6d3b
+    classDef info fill: #d9edf7, stroke: #bce8f1, stroke-width: 1px, color: #31708f
+    classDef success fill: #dff0d8, stroke: #d6e9c6, stroke-width: 1px, color: #3c763d
+
+    classDef deleted fill: #f2dede, stroke: #a94442, stroke-width: 1px, color: #a94442
+    classDef patched fill: #fcf8e3, stroke: #faebcc, stroke-width: 1px, color: #8a6d3b
+    classDef unchanged fill: #d9edf7, stroke: #bce8f1, stroke-width: 1px, color: #31708f
+    classDef created fill: #dff0d8, stroke: #d6e9c6, stroke-width: 1px, color: #3c763d
+
+    subgraph config
+        roles_that_cascade_to_sub_groups
+        create_dataset_if_not_in_organization
+        create_unowned_dataset
+        allow_admin_collaborators
+        user_create_groups
+        user_create_organizations
+        allow_dataset_collaborators
+        allow_collaborators_to_change_owner_org
+        anon_create_dataset
+        create_user_via_api
+        create_user_via_web
+        user_delete_groups
+        organization_delete
+        public_activity_stream_detail
+    end
+
+
+    subgraph authz
+        direction TB
+        ROLE_PERMISSIONS:::deleted
+        user_is_collaborator_on_dataset:::deleted
+        roles_list:::deleted
+        trans_role:::patched
+        roles_trans:::patched
+        get_roles_with_permission:::deleted
+        _has_user_permission_for_groups:::patched
+        has_user_permission_for_group_or_org:::unchanged
+        has_user_permission_for_some_org:::patched
+        can_manage_collaborators:::deleted
+        check_config_permission
+        get_collaborator_capacities
+
+        roles_list --> ROLE_PERMISSIONS
+        roles_list --> trans_role
+        roles_trans --> ROLE_PERMISSIONS
+        roles_trans --> trans_role
+        get_roles_with_permission --> ROLE_PERMISSION
+        _has_user_permission_for_groups --> ROLE_PERMISSION
+
+        has_user_permission_for_some_org --> get_roles_with_permission
+        has_user_permission_for_group_or_org --> _has_user_permission_for_groups
+        has_user_permission_for_group_or_org --> roles_that_cascade_to_sub_groups
+
+        can_manage_collaborators -->|membership| has_user_permission_for_group_or_org
+        can_manage_collaborators --> user_is_collaborator_on_dataset
+        can_manage_collaborators --> create_dataset_if_not_in_organization
+        can_manage_collaborators --> create_unowned_dataset
+
+        get_collaborator_capacities --> allow_admin_collaborators
+    end
+
+    subgraph auth
+        package_update:::patched
+        group_update:::unchanged
+        organization_update:::unchanged
+        group_edit_permissions:::unchanged
+        bulk_update_private:::unchanged
+        bulk_update_public:::unchanged
+        bulk_update_delete:::unchanged
+        group_show:::unchanged
+        organization_show:::unchanged
+        package_collaborator_list:::patched
+        group_delete:::unchanged
+        organization_delete:::unchanged
+        member_delete:::unchanged
+        package_delete:::unchanged
+        package_collaborator_delete:::patched
+        package_create:::unchanged
+        _check_group_auth:::unchanged
+        auth__group_or_org_member_create:::unchanged
+        member_create:::unchanged
+        package_collaborator_create:::patched
+
+        package_update -->|update_dataset| has_user_permission_for_group_or_org
+        package_update --> user_is_collaborator_on_dataset
+        group_update -->|update| has_user_permission_for_group_or_org
+        organization_update -->|update| has_user_permission_for_group_or_org
+        group_edit_permissions -->|update| has_user_permission_for_group_or_org
+        bulk_update_private -->|update| has_user_permission_for_group_or_org
+        bulk_update_public -->|update| has_user_permission_for_group_or_org
+        bulk_update_delete -->|update| has_user_permission_for_group_or_org
+
+        organization_show --> group_show
+        group_show -->|read| has_user_permission_for_group_or_org
+        package_collaborator_list --> can_manage_collaborators
+
+        package_collaborator_delete --> can_manage_collaborators
+        package_delete --> package_update
+        member_delete --> member_create
+        group_delete -->|delete| has_user_permission_for_group_or_org
+        organization_delete -->|delete| has_user_permission_for_group_or_org
+        package_collaborator_create --> can_manage_collaborators
+        package_create -->|create_dataset| has_user_permission_for_group_or_org
+        _check_group_auth -->|manage_group| has_user_permission_for_group_or_org
+        auth__group_or_org_member_create -->|membership| has_user_permission_for_group_or_org
+        member_create --> has_user_permission_for_group_or_org
+
+        group_create --> user_create_groups
+        organization_create --> user_create_organizations
+
+        package_create --> anon_create_dataset
+        package_create --> create_dataset_if_not_in_organization
+        package_create --> create_unowned_dataset
+
+        user_create --> create_user_via_api
+        user_create --> create_user_via_web
+
+        group_delete --> user_delete_groups
+        group_delete --> organization_delete
+
+        activity_list --> public_activity_stream_detail
+
+        package_update --> anon_create_dataset
+        package_update --> create_dataset_if_not_in_organization
+        package_update --> anon_create_dataset
+        package_update --> allow_dataset_collaborators
+
+    end
+
+    subgraph action
+        action__group_or_org_member_create:::patched
+        group_list_authz:::patched
+        organization_list_for_user:::patched
+        member_list:::patched
+        member_roles_list:::patched
+        package_collaborator_create
+        package_collaborator_list
+        package_collaborator_list_for_user
+
+        action__group_or_org_member_create --> member_schema
+        group_list_authz -->|manage_group| get_roles_with_permission
+        organization_list_for_user --> get_roles_with_permission
+        organization_list_for_user --> roles_that_cascade_to_sub_groups
+        member_list ---> roles_trans
+        member_roles_list --> roles_list
+        package_collaborator_create --> get_collaborator_capacities
+        package_collaborator_create --> allow_dataset_collaborators
+        package_collaborator_list --> get_collaborator_capacities
+        package_collaborator_list --> allow_dataset_collaborators
+        package_collaborator_list_for_user --> get_collaborator_capacities
+        package_collaborator_list_for_user --> allow_dataset_collaborators
+
+        _group_or_org_delete --> create_unowned_dataset
+        _group_or_org_purge --> create_unowned_dataset
+
+        package_collaborator_delete --> allow_dataset_collaborators
+    end
+
+    subgraph validators
+        role_exists:::patched
+        owner_org_validator:::patched
+
+        role_exists --> ROLE_PERMISSIONS
+        owner_org_validator -->|create_dataset| has_user_permission_for_group_or_org
+        owner_org_validator --> user_is_collaborator_on_dataset
+        owner_org_validator --> create_unowned_dataset
+        owner_org_validator --> allow_dataset_collaborators
+        owner_org_validator --> allow_collaborators_to_change_owner_org
+    end
+
+    subgraph schema
+        member_schema
+        member_schema --> role_exists
+    end
+
+    subgraph lib_helpers
+        roles_translated:::danger
+        roles_translated --> roles_trans
+    end
+
+    subgraph model_dictize
+        group_dictize:::unchanged
+        group_dictize -->|read| has_user_permission_for_group_or_org
+    end
+
+    subgraph model_save
+        package_membership_list_save:::unchanged
+        package_membership_list_save -->|read| has_user_permission_for_group_or_org
+    end
+
+    subgraph mailer
+        get_invite_body:::patched
+        get_invite_body --> roles_translated
+    end
+
+    subgraph templates
+        organization_snippets_organization_item:::patched
+        organization_snippets_organization_item --> roles_translated
+    end
+
+    subgraph helpers
+        can_update_owner_org
+
+        can_update_owner_org --> allow_collaborators_to_change_owner_org
+        can_update_owner_org --> allow_dataset_collaborators
+    end
+
+    subgraph plugins
+        DefaultPermissionLabels.get_dataset_labels
+        DefaultPermissionLabels.get_user_dataset_labels
+
+        DefaultPermissionLabels.get_dataset_labels --> allow_dataset_collaborators
+        DefaultPermissionLabels.get_user_dataset_labels --> allow_dataset_collaborators
+    end
+
+    subgraph views
+        CollaboratorEditView.get
+        dataset.register_dataset_plugin_rules
+
+        CollaboratorEditView.get --> allow_admin_collaborators
+        dataset.register_dataset_plugin_rules --> allow_dataset_collaborators
+    end
