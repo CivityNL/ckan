@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 import functools
+import inspect
 import sys
 
 from collections import defaultdict, OrderedDict
@@ -239,84 +240,293 @@ def get_collaborator_capacities():
         return ('editor', 'member')
 
 
-def trans_role(role):
-    return get_role_permissions()[role]['label']
+def trans_role(object_type, role):
+    return get_role_permissions(object_type)[role]['label']
 
 
-def roles_list():
+def roles_list(object_type):
     ''' returns list of roles for forms '''
     roles = []
-    for role in get_role_permissions():
-        roles.append(dict(text=trans_role(role), value=role))
+    for role in get_role_permissions(object_type):
+        roles.append(dict(text=trans_role(object_type, role), value=role))
     return roles
 
 
-def roles_trans():
+def roles_trans(object_type):
     ''' return dict of roles with translation '''
     roles = {}
-    for role in get_role_permissions():
-        roles[role] = trans_role(role)
+    for role in get_role_permissions(object_type):
+        roles[role] = trans_role(object_type, role)
     return roles
 
 
-DEFAULT_ROLE_PERMISSIONS = OrderedDict([
+DEFAULT_PERMISSIONS = {
+    'user_read': 'Read an user',
+    'organization_read': 'Read an organization',
+    'organization_create': 'Create an organization',
+    'organization_update': 'Update an organization',
+    'organization_delete': 'Delete an organization',
+    'organization_manage_users': 'Manage organization members',
+    'organization_manage_packages': 'Manage organization datasets',
+    'group_read': 'Read a group',
+    'group_create': 'Create a group',
+    'group_update': 'Update a group',
+    'group_delete': 'Delete a group',
+    'group_manage_users': 'Manage group members',
+    'group_manage_packages': 'Manage group datasets',
+    'package_create': 'Create a dataset',
+    'package_update': 'Update a dataset',
+    'package_delete': 'Delete a dataset',
+    'package_manage_users': 'Manage dataset users (collaborators)',
+    'package_read_activity': 'Manage dataset users (collaborators)',
+}
+
+
+def _get_permissions_with_prefix(prefix=None):
+    if prefix is None:
+        return []
+    if isinstance(prefix, str):
+        prefix = [prefix]
+    return [p for p in DEFAULT_PERMISSIONS if p.startswith(tuple(prefix))]
+
+
+DEFAULT_ORGANIZATION_ROLE_PERMISSIONS = OrderedDict([
     ('admin', {
-        'permissions': ['admin', 'membership'],
+        'permissions': _get_permissions_with_prefix(['organization_', 'package_']),
         'label': _('Admin'),
-        # organization description
         'description': _('Can add/edit and delete datasets, as well as manage organization members.'),
-        # group description
-        # 'description': _('Can edit group information, as well as manage organization members.'),
-        # dataset description
-        # 'description':
-        #     _('In addition to managing the dataset, admins can add and remove collaborators from a dataset.'),
     }),
     ('editor', {
-        'permissions': ['read', 'delete_dataset', 'create_dataset', 'update_dataset', 'manage_group'],
+        'permissions': ['organization_read', 'package_create', 'package_update', 'package_delete',
+                        'organization_manage_packages'],
         'label': _('Editor'),
-        # organization
         'description': _('Can add and edit datasets, but not manage organization members.'),
-        # group description
-        # 'description': None,
-        # dataset description
-        # 'description': _('Editors can edit the dataset and its resources, as well accessing the dataset if private.'),
     }),
     ('member', {
-        'permissions': ['read', 'manage_group'],
+        'permissions': ['organization_read'],
         'label': _('Member'),
         'description': _('Can view the organization\'s private datasets, but not add new datasets.'),
-        # group description
-        # 'description': _('Can add/remove datasets from groups.'),
-        # dataset description
-        # 'description': _('Members can access the dataset if private, but not edit it.'),
     }),
 ])
+
+DEFAULT_GROUP_ROLE_PERMISSIONS = OrderedDict([
+    ('admin', {
+        'permissions': _get_permissions_with_prefix('group_'),
+        'label': _('Admin'),
+        'description': _('Can edit group information, as well as manage group members.'),
+    }),
+    ('member', {
+        'permissions': ['group_read', 'group_manage_packages'],
+        'label': _('Member'),
+        'description': _('Can add/remove datasets from groups.'),
+    }),
+])
+
+DEFAULT_DATASET_ROLE_PERMISSIONS = OrderedDict([
+    ('admin', {
+        'permissions': ['organization_read', 'organization_manage_packages'] + _get_permissions_with_prefix('package_'),
+        'label': _('Admin'),
+        'description':
+            _('In addition to managing the dataset, admins can add and remove collaborators from a dataset.'),
+    }),
+    ('editor', {
+        'permissions': ['organization_read', 'package_create', 'package_update', 'package_delete'],
+        'label': _('Editor'),
+        'description': _('Editors can edit the dataset and its resources, as well accessing the dataset if private.'),
+    }),
+    ('member', {
+        'permissions': ['organization_read'],
+        'label': _('Member'),
+        'description': _('Members can access the dataset if private, but not edit it.'),
+    }),
+])
+
+ANON_ROLE_PERMISSIONS = None
+USER_ROLE_PERMISSIONS = None
 ROLE_PERMISSIONS = None
+PERMISSIONS = None
+PERMISSION_GROUPS = None
 
 
-def get_role_permissions():
-    global ROLE_PERMISSIONS
-    if ROLE_PERMISSIONS is None:
-        print("ckan.authz.get_role_permissions -> setting ROLE_PERMISSIONS")
-        ROLE_PERMISSIONS = DEFAULT_ROLE_PERMISSIONS
-        for plugin in p.PluginImplementations(IAuthorization):
-            ROLE_PERMISSIONS = plugin.get_roles(ROLE_PERMISSIONS)
-    else:
-        print("ckan.authz.get_role_permissions -> returning ROLE_PERMISSIONS")
-    return ROLE_PERMISSIONS
+def get_permissions():
+    assert PERMISSIONS is not None
+    return PERMISSIONS
 
 
-def get_roles_with_permission(permission):
-    ''' returns the roles with the permission requested '''
-    role_permissions = get_role_permissions()
-    roles = []
-    for role in role_permissions:
-        permissions = role_permissions[role]['permissions']
-        if permission in permissions or 'admin' in permissions:
-            roles.append(role)
+def get_anon_permissions():
+    assert ANON_ROLE_PERMISSIONS is not None
+    return ANON_ROLE_PERMISSIONS
+
+
+def get_user_role_permissions():
+    assert USER_ROLE_PERMISSIONS is not None
+    return USER_ROLE_PERMISSIONS
+
+
+def get_role_permission_object_types():
+    assert ROLE_PERMISSIONS is not None
+    return list(ROLE_PERMISSIONS.keys())
+
+
+def get_role_permissions(object_type):
+    assert ROLE_PERMISSIONS is not None
+    return ROLE_PERMISSIONS[object_type]
+
+
+def get_roles_with_permission(object_type, permission):
+    print(f"get_roles_with_permission from {inspect.currentframe().f_back.f_code.co_name}")
+    role_permissions = get_role_permissions(object_type)
+    roles = [role for role in role_permissions if permission in role_permissions[role]['permissions']]
+    print(f"get_roles_with_permission(object_type='{object_type}', permission='{permission}') => {roles}")
     return roles
 
 
+def _decorator_factory(max_depth=5):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            co_names = func.__code__.co_varnames[:func.__code__.co_argcount]
+            co_values = [None]*len(co_names)
+            if func.__defaults__:
+                co_values[-(len(func.__defaults__)):] = func.__defaults__
+            co_values[:len(args)] = args
+            co_args = ""
+            if co_names:
+                co_args = "(" + " ".join([f"{key}='{co_values[i]}'" for i, key in enumerate(co_names)]) + ")"
+            print(f"{func.__name__}{co_args} called from:")
+            f_back = inspect.currentframe().f_back
+            depth = 1
+            while f_back and (max_depth is None or depth <= max_depth):
+                func_name = f_back.f_code.co_name
+                file_name = f_back.f_code.co_filename
+                line_number = f_back.f_code.co_firstlineno
+                print(f" {'-' * depth} {func_name} at {file_name}#L{line_number}")
+                f_back = f_back.f_back
+                depth += 1
+            if f_back:
+                print(f" {'-' * depth} ... truncated ...")
+            result = func(*args, **kwargs)
+            print(f"{func.__name__}{co_args} returned -> {result}")
+            return result
+        return wrapper
+    return decorator
+
+
+@_decorator_factory()
+def register_role_permissions():
+    global ANON_ROLE_PERMISSIONS, USER_ROLE_PERMISSIONS, ROLE_PERMISSIONS, PERMISSIONS
+    ccp = check_config_permission
+
+    PERMISSIONS = DEFAULT_PERMISSIONS
+    ROLE_PERMISSIONS = {
+        'organization': DEFAULT_ORGANIZATION_ROLE_PERMISSIONS,
+        'group': DEFAULT_GROUP_ROLE_PERMISSIONS,
+        'package': DEFAULT_DATASET_ROLE_PERMISSIONS,
+    }
+
+    # anon_create_dataset, create_dataset_if_not_in_organization, and create_unowned_dataset
+    if ccp('create_dataset_if_not_in_organization') and ccp('create_unowned_dataset'):
+        USER_ROLE_PERMISSIONS = ['package_create', 'package_update', 'package_delete', 'user_read']
+        if ccp('anon_create_dataset'):
+            ANON_ROLE_PERMISSIONS = ['package_create', 'package_update', 'package_delete']
+
+    if ccp('user_create_groups'):
+        USER_ROLE_PERMISSIONS.append('group_create')
+    if ccp('user_create_organizations'):
+        USER_ROLE_PERMISSIONS.append('organization_create')
+
+    if ccp('user_delete_groups'):
+        ROLE_PERMISSIONS['group']['admin']['permissions'].append('group_delete')
+    if ccp('user_delete_organizations'):
+        ROLE_PERMISSIONS['organization']['admin']['permissions'].append('organization_delete')
+
+    if not ccp('allow_dataset_collaborators'):
+        ROLE_PERMISSIONS['package'] = OrderedDict()
+    elif not ccp('allow_admin_collaborators'):
+        del ROLE_PERMISSIONS['package']['admin']
+
+    if ccp('allow_dataset_collaborators') and not ccp('allow_collaborators_to_change_owner_org'):
+        p = 'organization_manage_datasets'
+        for role in ROLE_PERMISSIONS['package']:
+            if p in ROLE_PERMISSIONS['package'][role]['permissions']:
+                ROLE_PERMISSIONS['package'][role]['permissions'].remove(p)
+
+    if ccp('public_user_details'):
+        ANON_ROLE_PERMISSIONS.append('user_read')
+
+    errors = {}
+    check_dict = {
+        ('anon',): ANON_ROLE_PERMISSIONS,
+        ('user',): ANON_ROLE_PERMISSIONS,
+    }
+    check_dict.update({(ot,r,): rp['permissions'] for ot, orp in ROLE_PERMISSIONS.items() for r, rp in orp.items()})
+
+    for check_key, check_permissions in check_dict.items():
+        for check_permission in check_permissions:
+            if check_permission not in PERMISSIONS:
+                _dict = errors
+                for check_key_item in check_key:
+                    _dict.setdefault(check_key_item, {})
+                    _dict = _dict.get(check_key_item)
+                _dict.setdefault(check_permission, 'Not existing permission')
+
+    if errors:
+        raise ValueError(errors)
+
+
+@_decorator_factory()
+def has_user_permission(user_name_or_id, permission):
+    # check for user_name_or_id
+    user_id = get_user_id_for_username(user_name_or_id, allow_none=True)
+    if is_sysadmin(user_id):
+        return True
+
+    if permission not in PERMISSIONS:
+        return False
+
+    if user_id:
+        return permission in USER_ROLE_PERMISSIONS
+    else:
+        return permission in ANON_ROLE_PERMISSIONS
+
+
+@_decorator_factory()
+def has_user_permission_for_package(package_id, user_name_or_id, permission):
+
+    # check for package
+    package = model.Package.get(package_id)
+    if not package:
+        return False
+
+    # check for user_name_or_id
+    user_id = get_user_id_for_username(user_name_or_id, allow_none=True)
+    if is_sysadmin(user_id):
+        return True
+
+    # check for user_name_or_id
+    if permission not in PERMISSIONS:
+        return False
+
+    if user_id:
+        q = model.Session.query(model.PackageMember) \
+            .filter(model.PackageMember.user_id == user_id) \
+            .filter(model.PackageMember.package_id == package.id) \
+            .filter(model.PackageMember.capacity.in_(get_roles_with_permission('package', permission)))
+
+        if q.count() > 0:
+            return True
+
+    if package.owner_org:
+        return has_user_permission_for_organization(package.owner_org, user_name_or_id, permission)
+
+    return has_user_permission(user_id, permission)
+
+
+@_decorator_factory()
+def has_user_permission_for_organization(organization_id, user_name, permission):
+    return None
+
+
+@_decorator_factory()
 def has_user_permission_for_group_or_org(group_id, user_name, permission):
     ''' Check if the user has the given permissions for the group, allowing for
     sysadmin rights and permission cascading down a group hierarchy.
@@ -349,6 +559,7 @@ def has_user_permission_for_group_or_org(group_id, user_name, permission):
     return False
 
 
+@_decorator_factory()
 def _has_user_permission_for_groups(user_id, permission, group_ids,
                                     capacity=None):
     ''' Check if the user has the given permissions for the particular
@@ -367,7 +578,7 @@ def _has_user_permission_for_groups(user_id, permission, group_ids,
         q = q.filter(model.Member.capacity == capacity)
     # see if any role has the required permission
     # admin permission allows anything for the group
-    role_permissions = get_role_permissions()
+    role_permissions = get_role_permissions('group')
     for row in q.all():
         perms = role_permissions.get(row.capacity, {}).get('permissions', [])
         if 'admin' in perms or permission in perms:
@@ -399,33 +610,24 @@ def users_role_for_group_or_org(group_id, user_name):
     return None
 
 
+@_decorator_factory()
 def has_user_permission_for_some_org(user_name, permission):
     ''' Check if the user has the given permission for any organization. '''
     user_id = get_user_id_for_username(user_name, allow_none=True)
     if not user_id:
         return False
-    roles = get_roles_with_permission(permission)
+    roles = get_roles_with_permission('organization', permission)
 
     if not roles:
         return False
     # get any groups the user has with the needed role
+    join_on = model.Member.group_id == model.Group.id and model.Group.is_organization and model.Group.state == 'active'
     q = model.Session.query(model.Member) \
+        .join(model.Group, join_on) \
         .filter(model.Member.table_name == 'user') \
         .filter(model.Member.state == 'active') \
         .filter(model.Member.capacity.in_(roles)) \
         .filter(model.Member.table_id == user_id)
-    group_ids = []
-    for row in q.all():
-        group_ids.append(row.group_id)
-    # if not in any groups has no permissions
-    if not group_ids:
-        return False
-
-    # see if any of the groups are orgs
-    q = model.Session.query(model.Group) \
-        .filter(model.Group.is_organization == True) \
-        .filter(model.Group.state == 'active') \
-        .filter(model.Group.id.in_(group_ids))
 
     return bool(q.count())
 
@@ -513,6 +715,7 @@ CONFIG_PERMISSIONS_DEFAULTS = {
     'create_user_via_api': False,
     'create_user_via_web': False,
     'roles_that_cascade_to_sub_groups': 'admin',
+    'public_user_details': True,
     'public_activity_stream_detail': False,
     'allow_dataset_collaborators': False,
     'allow_admin_collaborators': False,

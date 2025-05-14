@@ -308,6 +308,7 @@ def update_config():
     for plugin in p.PluginImplementations(p.IConfigurable):
         plugin.configure(config)
 
+    authz.register_role_permissions()
     # reset the template cache - we do this here so that when we load the
     # environment it is clean
     render.reset_template_info_cache()
