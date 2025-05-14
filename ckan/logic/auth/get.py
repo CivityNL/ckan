@@ -161,24 +161,25 @@ def resource_view_list(context, data_dict):
     return authz.is_authorized('resource_show', context, data_dict)
 
 
-def group_show(context, data_dict):
+def _group_or_organization_show(context, data_dict):
+    print("_group_or_organization_show")
     user = context.get('user')
     group = get_group_object(context, data_dict)
     if group.state == 'active':
-        if asbool(config.get('ckan.auth.public_user_details', True)) or \
-            (not asbool(data_dict.get('include_users', False)) and
-                (data_dict.get('object_type', None) != 'user')):
-            return {'success': True}
-    authorized = authz.has_user_permission_for_group_or_org(
-        group.id, user, 'read')
-    if authorized:
+        return {'success': True}
+    permission = 'organization_read' if group.is_organization else 'group_read'
+    if authz.has_user_permission_for_group_or_org(group.id, user, permission):
         return {'success': True}
     else:
         return {'success': False, 'msg': _('User %s not authorized to read group %s') % (user, group.id)}
 
 
+def group_show(context, data_dict):
+    return _group_or_organization_show(context, data_dict)
+
+
 def organization_show(context, data_dict):
-    return authz.is_authorized('group_show', context, data_dict)
+    return _group_or_organization_show(context, data_dict)
 
 
 def vocabulary_show(context, data_dict):
@@ -194,10 +195,8 @@ def tag_show(context, data_dict):
 def user_show(context, data_dict):
     # By default, user details can be read by anyone, but some properties like
     # the API key are stripped at the action level if not not logged in.
-    if not asbool(config.get('ckan.auth.public_user_details', True)):
-        return restrict_anon(context)
-    else:
-        return {'success': True}
+    user = context['user']
+    return {'success': authz.has_user_permission(user, 'user_read')}
 
 
 def package_autocomplete(context, data_dict):
@@ -268,8 +267,7 @@ def activity_list(context, data_dict):
         (otherwise the data field is only returned with the object's title)
     :type include_data: boolean
     '''
-    if data_dict['object_type'] not in ('package', 'organization', 'group',
-                                        'user'):
+    if data_dict['object_type'] not in ('package', 'organization', 'group', 'user'):
         return {'success': False, 'msg': 'object_type not recognized'}
     if (data_dict.get('include_data') and
         not authz.check_config_permission('public_activity_stream_detail')):
@@ -449,12 +447,8 @@ def package_collaborator_list(context, data_dict):
     See :py:func:`~ckan.authz.can_manage_collaborators` for details
     '''
     user = context['user']
-    model = context['model']
-
-    pkg = model.Package.get(data_dict['id'])
-    user_obj = model.User.get(user)
-
-    if not authz.can_manage_collaborators(pkg.id, user_obj.id):
+    package_id = data_dict['id']
+    if not authz.has_user_permission_for_package(package_id, user, 'package_manage_users'):
         return {
             'success': False,
             'msg': _('User %s not authorized to list collaborators from this dataset') % user}

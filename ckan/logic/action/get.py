@@ -583,7 +583,7 @@ def group_list_authz(context, data_dict):
     _check_access('group_list_authz', context, data_dict)
 
     sysadmin = authz.is_sysadmin(user)
-    roles = authz.get_roles_with_permission('manage_group')
+    roles = authz.get_roles_with_permission('group', 'manage_group')
     if not roles:
         return []
     user_id = authz.get_user_id_for_username(user, allow_none=True)
@@ -688,7 +688,7 @@ def organization_list_for_user(context, data_dict):
 
         permission = data_dict.get('permission', 'manage_group')
 
-        roles = authz.get_roles_with_permission(permission)
+        roles = authz.get_roles_with_permission('organization', permission)
 
         if not roles:
             return []
@@ -822,11 +822,14 @@ def user_list(context, data_dict):
 
     '''
     model = context['model']
+    user = context.get('user')
 
     _check_access('user_list', context, data_dict)
 
     q = data_dict.get('q', '')
-    email = data_dict.get('email')
+    email = None
+    if authz.is_sysadmin(user):
+        email = data_dict.get('email')
     order_by = data_dict.get('order_by', 'display_name')
     all_fields = asbool(data_dict.get('all_fields', True))
 

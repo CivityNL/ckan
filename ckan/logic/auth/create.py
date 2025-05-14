@@ -10,6 +10,8 @@ from ckan.common import _
 def package_create(context, data_dict=None):
     user = context['user']
 
+    authz.has_user_permission_for_package
+
     if authz.auth_is_anon_user(context):
         check1 = all(authz.check_config_permission(p) for p in (
             'anon_create_dataset',
@@ -110,20 +112,18 @@ def package_relationship_create(context, data_dict):
         return {'success': True}
 
 def group_create(context, data_dict=None):
+    print("group_create")
     user = context['user']
-    user = authz.get_user_id_for_username(user, allow_none=True)
-
-    if user and authz.check_config_permission('user_create_groups'):
+    if authz.has_user_permission(user, 'group_create'):
         return {'success': True}
     return {'success': False,
             'msg': _('User %s not authorized to create groups') % user}
 
 
 def organization_create(context, data_dict=None):
+    print("organization_create")
     user = context['user']
-    user = authz.get_user_id_for_username(user, allow_none=True)
-
-    if user and authz.check_config_permission('user_create_organizations'):
+    if authz.has_user_permission(user, 'organization_create'):
         return {'success': True}
     return {'success': False,
             'msg': _('User %s not authorized to create organizations') % user}
