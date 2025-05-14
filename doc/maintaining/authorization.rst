@@ -1,6 +1,6 @@
-===============================
-Organizations and authorization
-===============================
+=============
+Authorization
+=============
 
 CKAN's authorization system controls which users are allowed to carry out which
 actions on the site. All actions that users can carry out on a CKAN site are

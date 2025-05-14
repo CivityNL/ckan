@@ -1,0 +1,50 @@
+{% extends "admin/base.html" %}
+
+{% block primary_content_inner %}
+
+  {% block config_permissions %}
+    <h2>Configuration permissions</h2>
+    <ul>
+    {% for permission, value in config_permissions.items() %}
+      <li><b>{{ permission }}</b>: {{ value }}</li>
+    {% endfor %}
+    </ul>
+  {% endblock %}
+
+  {% block permissions %}
+    <h2>Permissions</h2>
+    <ul>
+    {% for permission, description in permissions.items() %}
+      <li><b>{{ permission }}</b>: {{ description }}</li>
+    {% endfor %}
+    </ul>
+  {% endblock %}
+
+  {% block role_permissions %}
+    <h2>Role/capacity permissions</h2>
+    <ul>
+    {% for object_type, object_role_permissions in role_permissions.items() %}
+      <li><b>{{ object_type }}</b></li>
+      <ul>
+        {% for role, permissions in object_role_permissions.items() %}
+          <li>{{ role }}</li>
+          <ul>
+            {% for key, value in permissions.items() %}
+              <li><b>{{ key }}</b>: {{ value }}</li>
+            {% endfor %}
+          </ul>
+        {% endfor %}
+      </ul>
+    {% endfor %}
+    </ul>
+  {% endblock %}
+
+  {% block user_permissions %}
+    <h2>User permissions</h2>
+    <ul>
+      <li><b>anon</b>: {{ anon_permissions }}</li>
+      <li><b>user</b>: {{ user_permissions }}</li>
+    </ul>
+  {% endblock %}
+
+{% endblock %}

@@ -11,6 +11,8 @@ import ckan.lib.helpers as h
 import ckan.lib.navl.dictization_functions as dict_fns
 import ckan.logic as logic
 import ckan.model as model
+from ckan.authz import get_role_permissions, CONFIG_PERMISSIONS_DEFAULTS, check_config_permission, \
+    get_role_permission_object_types, get_anon_permissions, get_user_role_permissions, get_permissions
 from ckan.common import g, _, config, request
 from ckan.views.home import CACHE_PARAMETERS
 
@@ -240,8 +242,22 @@ class TrashView(MethodView):
         return actions.get(ent_type)
 
 
+class AuthorizationView(MethodView):
+
+    def get(self):
+        extra_vars = dict(
+            permissions=get_permissions(),
+            anon_permissions=get_anon_permissions(),
+            user_permissions=get_user_role_permissions(),
+            role_permissions={ot: get_role_permissions(ot) for ot in get_role_permission_object_types()},
+            config_permissions={k: check_config_permission(k) for k in CONFIG_PERMISSIONS_DEFAULTS.keys()}
+        )
+        return base.render(u'admin/authorization.html', extra_vars=extra_vars)
+
+
 admin.add_url_rule(u'/', view_func=index, strict_slashes=False)
 admin.add_url_rule(u'/reset_config',
                    view_func=ResetConfigView.as_view(str(u'reset_config')))
 admin.add_url_rule(u'/config', view_func=ConfigView.as_view(str(u'config')))
 admin.add_url_rule(u'/trash', view_func=TrashView.as_view(str(u'trash')))
+admin.add_url_rule(u'/authorization', view_func=AuthorizationView.as_view(str(u'authorization')))
