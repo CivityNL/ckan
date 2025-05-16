@@ -42,6 +42,7 @@ def package_create(context, data_dict=None):
 
 
 def file_upload(context, data_dict=None):
+    # TODO check if this is an actual used auth function as no corresponding action exists
     user = context['user']
     if authz.auth_is_anon_user(context):
         return {'success': False, 'msg': _('User %s not authorized to create packages') % user}
@@ -90,8 +91,7 @@ def resource_create_default_resource_views(context, data_dict):
 
 
 def package_create_default_resource_views(context, data_dict):
-    return authz.is_authorized('package_update', context,
-                               data_dict['package'])
+    return authz.is_authorized('package_update', context, data_dict['package'])
 
 
 def package_relationship_create(context, data_dict):
@@ -127,6 +127,7 @@ def organization_create(context, data_dict=None):
         return {'success': True}
     return {'success': False,
             'msg': _('User %s not authorized to create organizations') % user}
+
 
 def rating_create(context, data_dict):
     # No authz check in the logic function

@@ -374,10 +374,10 @@ def get_role_permissions(object_type):
 
 
 def get_roles_with_permission(object_type, permission):
-    print(f"get_roles_with_permission from {inspect.currentframe().f_back.f_code.co_name}")
+    log.debug(f"get_roles_with_permission from {inspect.currentframe().f_back.f_code.co_name}")
     role_permissions = get_role_permissions(object_type)
     roles = [role for role in role_permissions if permission in role_permissions[role]['permissions']]
-    print(f"get_roles_with_permission(object_type='{object_type}', permission='{permission}') => {roles}")
+    log.debug(f"get_roles_with_permission(object_type='{object_type}', permission='{permission}') => {roles}")
     return roles
 
 
@@ -392,20 +392,20 @@ def _decorator_factory(max_depth=5):
             co_args = ""
             if co_names:
                 co_args = "(" + " ".join([f"{key}='{co_values[i]}'" for i, key in enumerate(co_names)]) + ")"
-            print(f"{func.__name__}{co_args} called from:")
+            log.debug(f"{func.__name__}{co_args} called from:")
             f_back = inspect.currentframe().f_back
             depth = 1
             while f_back and (max_depth is None or depth <= max_depth):
                 func_name = f_back.f_code.co_name
                 file_name = f_back.f_code.co_filename
                 line_number = f_back.f_code.co_firstlineno
-                print(f" {'-' * depth} {func_name} at {file_name}#L{line_number}")
+                log.debug(f" {'-' * depth} {func_name} at {file_name}#L{line_number}")
                 f_back = f_back.f_back
                 depth += 1
             if f_back:
-                print(f" {'-' * depth} ... truncated ...")
+                log.debug(f" {'-' * depth} ... truncated ...")
             result = func(*args, **kwargs)
-            print(f"{func.__name__}{co_args} returned -> {result}")
+            log.debug(f"{func.__name__}{co_args} returned -> {result}")
             return result
         return wrapper
     return decorator
@@ -422,6 +422,9 @@ def register_role_permissions():
         'group': DEFAULT_GROUP_ROLE_PERMISSIONS,
         'package': DEFAULT_DATASET_ROLE_PERMISSIONS,
     }
+
+    USER_ROLE_PERMISSIONS = []
+    ANON_ROLE_PERMISSIONS = []
 
     # anon_create_dataset, create_dataset_if_not_in_organization, and create_unowned_dataset
     if ccp('create_dataset_if_not_in_organization') and ccp('create_unowned_dataset'):
@@ -442,7 +445,8 @@ def register_role_permissions():
     if not ccp('allow_dataset_collaborators'):
         ROLE_PERMISSIONS['package'] = OrderedDict()
     elif not ccp('allow_admin_collaborators'):
-        del ROLE_PERMISSIONS['package']['admin']
+        if 'admin' in ROLE_PERMISSIONS['package']:
+            del ROLE_PERMISSIONS['package']['admin']
 
     if ccp('allow_dataset_collaborators') and not ccp('allow_collaborators_to_change_owner_org'):
         p = 'organization_manage_datasets'

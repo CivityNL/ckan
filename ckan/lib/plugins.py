@@ -660,7 +660,9 @@ class DefaultPermissionLabels(object):
         labels.append(u'creator-%s' % user_obj.id)
 
         orgs = logic.get_action(u'organization_list_for_user')(
-            {u'user': user_obj.id}, {u'permission': u'read'})
+            {u'user': user_obj.id},
+            {u'permission': u'organization_read'}
+        )
         labels.extend(u'member-%s' % o[u'id'] for o in orgs)
 
         if ckan.authz.check_config_permission('allow_dataset_collaborators'):

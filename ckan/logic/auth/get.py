@@ -115,6 +115,9 @@ def package_show(context, data_dict):
     package = get_package_object(context, data_dict)
     labels = get_permission_labels()
     user_labels = labels.get_user_dataset_labels(context['auth_user_obj'])
+    print(f"package = {package}")
+    print(f"dataset_labels = {labels.get_dataset_labels(package)}")
+    print(f"user_labels = {user_labels}")
     authorized = any(
         dl in user_labels for dl in labels.get_dataset_labels(package))
 

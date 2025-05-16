@@ -680,13 +680,13 @@ def organization_list_for_user(context, data_dict):
         .filter(model.Group.is_organization == True) \
         .filter(model.Group.state == 'active')
 
-    # TODO CIVDEV-1527: convert to permissions instead of capacaties
+    org_admin = list(authz.get_role_permissions('organization'))[0]
     if sysadmin:
-        orgs_and_capacities = [(org, 'admin') for org in orgs_q.all()]
+        orgs_and_capacities = [(org, org_admin) for org in orgs_q.all()]
     else:
         # for non-Sysadmins check they have the required permission
 
-        permission = data_dict.get('permission', 'manage_group')
+        permission = data_dict.get('permission', 'organization_manage_packages')
 
         roles = authz.get_roles_with_permission('organization', permission)
 
