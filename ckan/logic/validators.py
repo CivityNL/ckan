@@ -48,41 +48,30 @@ def owner_org_validator(key, data, errors, context):
     user = model.User.get(user)
     package = context.get('package')
 
-    if value == '':
-        if not authz.check_config_permission('create_unowned_dataset'):
-            raise Invalid(_('An organization must be provided'))
-        return
+    old_owner_org = None
+    if package:
+        old_owner_org = package.owner_org
 
-    if (authz.check_config_permission('allow_dataset_collaborators')
-            and not authz.check_config_permission('allow_collaborators_to_change_owner_org')):
+    new_owner_org = value
+    if new_owner_org:
+        group = model.Group.get(value)
+        if not group:
+            raise Invalid(_('Organization does not exist'))
+        new_owner_org = group.id
 
-        # TODO CIVDEV-1527: convert to permissions instead of capacaties
-        if package and user and not user.sysadmin:
-            is_collaborator = authz.user_is_collaborator_on_dataset(
-                user.id, package.id, ['admin', 'editor'])
-            if is_collaborator:
-                # User is a collaborator, check if it's also a member with
-                # edit rights of the current organization (redundant, but possible)
-                user_orgs = logic.get_action(
-                    'organization_list_for_user')(
-                        {'ignore_auth': True}, {'id': user.id, 'permission': 'update_dataset'})
-                user_is_org_member = package.owner_org in [org['id'] for org in user_orgs]
-                if data.get(key) != package.owner_org and not user_is_org_member:
-                    raise Invalid(_('You cannot move this dataset to another organization'))
-
-    group = model.Group.get(value)
-    if not group:
-        raise Invalid(_('Organization does not exist'))
-    group_id = group.id
-
-    if not package or (package and package.owner_org != group_id):
-        # This is a new dataset or we are changing the organization
-        if not context.get(u'ignore_auth', False) and not(user.sysadmin or
-               authz.has_user_permission_for_group_or_org(
-                   group_id, user.name, 'create_dataset')):
+    if old_owner_org is None:
+        if not authz.has_user_permission_for_organization(new_owner_org, user, 'package_create'):
             raise Invalid(_('You cannot add a dataset to this organization'))
+    elif new_owner_org != old_owner_org:
+        old_check = authz.has_user_permission_for_package(package.id, user, 'organization_manage_packages')
+        if new_owner_org == '':
+            new_check = authz.has_user_permission(user, 'organization_manage_packages')
+        else:
+            new_check = authz.has_user_permission_for_organization(new_owner_org, user, 'organization_manage_packages')
+        if not old_check or not new_check:
+            raise Invalid(_('You cannot move this dataset to another organization'))
 
-    data[key] = group_id
+    data[key] = new_owner_org
 
 
 def package_id_not_changed(value, context):
