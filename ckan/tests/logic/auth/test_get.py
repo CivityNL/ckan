@@ -83,7 +83,7 @@ class TestGetAuth(object):
     def test_group_show__deleted_group_is_visible_to_its_member(self):
 
         fred = factories.User(name="fred")
-        fred["capacity"] = "editor"
+        fred["capacity"] = "member"
         org = factories.Group(users=[fred], state="deleted")
         context = {"model": model}
         context["user"] = "fred"
