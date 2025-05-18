@@ -1,31 +1,3 @@
-===============================
-Organizations and authorization
-===============================
-
-CKAN's authorization system controls which users are allowed to carry out which
-actions on the site. All actions that users can carry out on a CKAN site are
-controlled by the authorization system. For example, the authorization system
-controls who can register new user accounts, delete user accounts, or create,
-edit and delete datasets, groups and organizations.
-
-Authorization in CKAN can be controlled in four ways:
-
-1. Organizations
-2. Dataset collaborators
-3. Configuration file options
-4. Extensions
-
-The following sections explain each of the four methods in turn.
-
-.. note::
-
-   An **organization admin** in CKAN is an administrator of a particular
-   organization within the site, with control over that organization and its
-   members and datasets. A **sysadmin** is an administrator of the site itself.
-   Sysadmins can always do everything, including adding, editing and deleting
-   datasets, organizations and groups, regardless of the organization roles and
-   configuration options described below.
-
 Organizations
 -------------
 
@@ -115,32 +87,3 @@ If the global ``ckan.auth.allow_dataset_collaborators`` setting is turned off in
 By default, collaborators can not change the owner organization of a dataset unless they are admins or editors in both the source and destination organizations. To allow collaborators to change the owner organization even if they don't belong to the source organization, set :ref:`ckan.auth.allow_collaborators_to_change_owner_org` to ``True``.
 
 Dataset collaborators can be used with other authorization settings to create custom authentication scenarios. For instance on instances where datasets don't need to belong to an organization (both :ref:`ckan.auth.create_dataset_if_not_in_organization` and :ref:`ckan.auth.create_unowned_dataset` are ``True``), the user that originally created a dataset can also add collaborators to it (allowing admin collaborators or not depending on the ``ckan.auth.allow_admin_collaborators`` setting). Note that in this case though, if the dataset is assigned to an organization, the original creator might no longer be able to access and edit, as organization permissions take precedence over collaborators ones.
-
-
-
-Configuration File Options
---------------------------
-
-The following configuration file options can be used to customize CKAN's
-authorization behavior:
-
-.. include:: /maintaining/configuration.rst
-    :start-after: start_config-authorization
-    :end-before: end_config-authorization
-
-Extensions
-----------
-
-CKAN extensions can implement custom authorization rules by overriding the
-authorization functions that CKAN uses. This is done by implementing the
-:py:class:`~ckan.plugins.interfaces.IAuthFunctions` plugin interface.
-
-Dataset visibility is determined by permission labels stored in the
-search index.
-Implement the :py:class:`~ckan.plugins.interfaces.IPermissionLabels`
-plugin interface then :ref:`rebuild your search index <rebuild search index>`
-to change your dataset visibility rules. There is no
-no need to override the ``package_show`` auth function, it will inherit
-these changes automatically.
-
-To get started with writing CKAN extensions, see :doc:`/extensions/index`.
