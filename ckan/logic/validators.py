@@ -774,10 +774,13 @@ def user_name_exists(user_name, context):
     return result.name
 
 
-def role_exists(object_type, role, context):
-    if role not in authz.get_role_permissions(object_type):
-        raise Invalid(_('role does not exist.'))
-    return role
+def role_exists(object_type):
+
+    def wrapper_role_exists(role, context):
+        if role not in authz.get_role_permissions(object_type):
+            raise Invalid(_('role does not exist.'))
+        return role
+    return wrapper_role_exists
 
 
 def datasets_with_no_organization_cannot_be_private(key, data, errors,

@@ -169,6 +169,8 @@ def _group_or_organization_show(context, data_dict):
     user = context.get('user')
     group = get_group_object(context, data_dict)
     if group.state == 'active':
+        if asbool(data_dict.get('include_users', False)):
+            return {'success': authz.has_user_permission_for_group_or_org(group.id, user, 'user_read')}
         return {'success': True}
     permission = 'organization_read' if group.is_organization else 'group_read'
     if authz.has_user_permission_for_group_or_org(group.id, user, permission):

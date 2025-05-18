@@ -558,15 +558,15 @@ def default_follow_dataset_schema(
     }
 
 
-@validator_args
-def member_schema(
-        not_missing, group_id_or_name_exists, unicode_safe,
-        user_id_or_name_exists, role_exists):
-    return {
-        'id': [not_missing, group_id_or_name_exists, unicode_safe],
-        'username': [not_missing, user_id_or_name_exists, unicode_safe],
-        'role': [not_missing, role_exists, unicode_safe],
-    }
+def member_schema(object_type):
+    @validator_args
+    def member_schema_wrapper(not_missing, group_id_or_name_exists, unicode_safe, user_id_or_name_exists, role_exists):
+        return {
+            'id': [not_missing, group_id_or_name_exists, unicode_safe],
+            'username': [not_missing, user_id_or_name_exists, unicode_safe],
+            'role': [not_missing, role_exists(object_type), unicode_safe],
+        }
+    return member_schema_wrapper()
 
 
 @validator_args

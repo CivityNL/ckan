@@ -13,7 +13,7 @@ installing, upgrading and configuring CKAN and its features and extensions.
    getting-started
    database-management
    cli
-   authorization
+   authorization/index
    data-viewer
    filestore
    datastore

@@ -362,6 +362,7 @@ meta.mapper(Member, member_table, properties={
 # limit on recursion.
 MAX_RECURSES = 8
 
+# https://github.com/sqlalchemy/sqlalchemy/discussions/11490
 HIERARCHY_DOWNWARDS_CTE = """WITH RECURSIVE child(depth) AS
 (
     -- non-recursive term
@@ -378,6 +379,7 @@ SELECT G.id, G.name, G.title, child.depth, child.table_id as parent_id FROM chil
     WHERE G.type = :type AND G.state='active'
     ORDER BY child.depth ASC;""".format(max_recurses=MAX_RECURSES)
 
+# https://github.com/sqlalchemy/sqlalchemy/discussions/11490
 HIERARCHY_UPWARDS_CTE = """WITH RECURSIVE parenttree(depth) AS (
     -- non-recursive term
     SELECT 0, M.* FROM public.member AS M

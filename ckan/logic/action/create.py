@@ -1466,7 +1466,7 @@ def _group_or_org_member_create(context, data_dict, is_org=False):
     user = context['user']
     session = context['session']
 
-    schema = ckan.logic.schema.member_schema()
+    schema = ckan.logic.schema.member_schema('organization' if is_org else 'group')
     data, errors = _validate(data_dict, schema, context)
     if errors:
         model.Session.rollback()
@@ -1483,8 +1483,7 @@ def _group_or_org_member_create(context, data_dict, is_org=False):
     if result:
         user_id = result.id
     else:
-        message = _(u'User {username} does not exist.').format(
-            username=username)
+        message = _(u'User {username} does not exist.').format(username=username)
         raise ValidationError({'message': message}, error_summary=message)
     member_dict = {
         'id': group.id,
@@ -1498,8 +1497,7 @@ def _group_or_org_member_create(context, data_dict, is_org=False):
         'session': session,
         'ignore_auth': context.get('ignore_auth'),
     }
-    return logic.get_action('member_create')(member_create_context,
-                                             member_dict)
+    return logic.get_action('member_create')(member_create_context, member_dict)
 
 
 def group_member_create(context, data_dict):

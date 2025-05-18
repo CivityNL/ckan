@@ -9,35 +9,15 @@ from ckan.common import _
 @logic.auth_allow_anonymous_access
 def package_create(context, data_dict=None):
     user = context['user']
-
-    authz.has_user_permission_for_package
-
-    if authz.auth_is_anon_user(context):
-        check1 = all(authz.check_config_permission(p) for p in (
-            'anon_create_dataset',
-            'create_dataset_if_not_in_organization',
-            'create_unowned_dataset',
-            ))
-    else:
-        check1 = all(authz.check_config_permission(p) for p in (
-            'create_dataset_if_not_in_organization',
-            'create_unowned_dataset',
-            )) or authz.has_user_permission_for_some_org(
-            user, 'create_dataset')
-
-    if not check1:
-        return {'success': False, 'msg': _('User %s not authorized to create packages') % user}
-
-    check2 = _check_group_auth(context,data_dict)
-    if not check2:
-        return {'success': False, 'msg': _('User %s not authorized to edit these groups') % user}
-
-    # If an organization is given are we able to add a dataset to it?
     data_dict = data_dict or {}
     org_id = data_dict.get('owner_org')
-    if org_id and not authz.has_user_permission_for_group_or_org(
-            org_id, user, 'create_dataset'):
+    permission = 'package_create'
+    if org_id and not authz.has_user_permission_for_group_or_org(org_id, user, permission):
         return {'success': False, 'msg': _('User %s not authorized to add dataset to this organization') % user}
+    elif not authz.has_user_permission(user, permission):
+        return {'success': False, 'msg': _('User %s not authorized to create packages') % user}
+    elif not _check_group_auth(context, data_dict):
+        return {'success': False, 'msg': _('User %s not authorized to edit these groups') % user}
     return {'success': True}
 
 
@@ -76,8 +56,7 @@ def resource_create(context, data_dict):
 
     if not authorized:
         return {'success': False,
-                'msg': _('User %s not authorized to create resources on dataset %s') %
-                        (str(user), package_id)}
+                'msg': _('User %s not authorized to create resources on dataset %s') % (str(user), package_id)}
     else:
         return {'success': True}
 
@@ -111,8 +90,8 @@ def package_relationship_create(context, data_dict):
     else:
         return {'success': True}
 
+
 def group_create(context, data_dict=None):
-    print("group_create")
     user = context['user']
     if authz.has_user_permission(user, 'group_create'):
         return {'success': True}
@@ -121,7 +100,6 @@ def group_create(context, data_dict=None):
 
 
 def organization_create(context, data_dict=None):
-    print("organization_create")
     user = context['user']
     if authz.has_user_permission(user, 'organization_create'):
         return {'success': True}
@@ -137,17 +115,16 @@ def rating_create(context, data_dict):
 @logic.auth_allow_anonymous_access
 def user_create(context, data_dict=None):
     using_api = 'api_version' in context
-    create_user_via_api = authz.check_config_permission(
-            'create_user_via_api')
-    create_user_via_web = authz.check_config_permission(
-            'create_user_via_web')
+    create_user_via_api = authz.check_config_permission('create_user_via_api')
+    create_user_via_web = authz.check_config_permission('create_user_via_web')
 
     if using_api and not create_user_via_api:
-        return {'success': False, 'msg': _('User {user} not authorized to '
-            'create users via the API').format(user=context.get('user'))}
+        return {
+            'success': False,
+            'msg': _('User {user} not authorized to create users via the API').format(user=context.get('user'))
+        }
     if not using_api and not create_user_via_web:
-        return {'success': False, 'msg': _('Not authorized to '
-            'create users')}
+        return {'success': False, 'msg': _('Not authorized to create users')}
     return {'success': True}
 
 
@@ -198,7 +175,7 @@ def _check_group_auth(context, data_dict):
         groups = groups - set(pkg_groups)
 
     for group in groups:
-        if not authz.has_user_permission_for_group_or_org(group.id, user, 'manage_group'):
+        if not authz.has_user_permission_for_group_or_org(group.id, user, 'group_manage_packages'):
             return False
 
     return True
@@ -219,16 +196,17 @@ def tag_create(context, data_dict):
     return {'success': False}
 
 
-def _group_or_org_member_create(context, data_dict):
+def _group_or_org_member_create(context, data_dict, is_org=False):
     user = context['user']
     group_id = data_dict['id']
-    if not authz.has_user_permission_for_group_or_org(group_id, user, 'membership'):
+    permission = 'organization_manage_users' if is_org else 'group_manage_users'
+    if not authz.has_user_permission_for_group_or_org(group_id, user, permission):
         return {'success': False, 'msg': _('User %s not authorized to add members') % user}
     return {'success': True}
 
 
 def organization_member_create(context, data_dict):
-    return _group_or_org_member_create(context, data_dict)
+    return _group_or_org_member_create(context, data_dict, is_org=True)
 
 
 def group_member_create(context, data_dict):
@@ -245,13 +223,10 @@ def member_create(context, data_dict):
     if not group.is_organization and data_dict.get('object_type') == 'package':
         permission = 'manage_group'
 
-    authorized = authz.has_user_permission_for_group_or_org(group.id,
-                                                                user,
-                                                                permission)
+    authorized = authz.has_user_permission_for_group_or_org(group.id, user, permission)
     if not authorized:
         return {'success': False,
-                'msg': _('User %s not authorized to edit group %s') %
-                        (str(user), group.id)}
+                'msg': _('User %s not authorized to edit group %s') % (str(user), group.id)}
     else:
         return {'success': True}
 
@@ -275,7 +250,7 @@ def package_collaborator_create(context, data_dict):
     pkg = model.Package.get(data_dict['id'])
     user_obj = model.User.get(user)
 
-    if not authz.can_manage_collaborators(pkg.id, user_obj.id):
+    if not authz.has_user_permission_for_package(pkg.id, user_obj.id, 'package_manage_users'):
         return {
             'success': False,
             'msg': _('User %s not authorized to add collaborators to this dataset') % user}

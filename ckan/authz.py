@@ -3,7 +3,7 @@
 import functools
 import inspect
 import sys
-
+from sqlalchemy import or_, and_
 from collections import defaultdict, OrderedDict
 from logging import getLogger
 
@@ -343,6 +343,7 @@ DEFAULT_DATASET_ROLE_PERMISSIONS = OrderedDict([
 
 ANON_ROLE_PERMISSIONS = None
 USER_ROLE_PERMISSIONS = None
+CREATOR_ROLE_PERMISSIONS = None
 ROLE_PERMISSIONS = None
 PERMISSIONS = None
 PERMISSION_GROUPS = None
@@ -363,6 +364,11 @@ def get_user_role_permissions():
     return USER_ROLE_PERMISSIONS
 
 
+def get_creator_role_permissions():
+    assert CREATOR_ROLE_PERMISSIONS is not None
+    return CREATOR_ROLE_PERMISSIONS
+
+
 def get_role_permission_object_types():
     assert ROLE_PERMISSIONS is not None
     return list(ROLE_PERMISSIONS.keys())
@@ -374,10 +380,10 @@ def get_role_permissions(object_type):
 
 
 def get_roles_with_permission(object_type, permission):
-    log.debug(f"get_roles_with_permission from {inspect.currentframe().f_back.f_code.co_name}")
+    _check_permission(permission)
     role_permissions = get_role_permissions(object_type)
     roles = [role for role in role_permissions if permission in role_permissions[role]['permissions']]
-    log.debug(f"get_roles_with_permission(object_type='{object_type}', permission='{permission}') => {roles}")
+    print(f"get_roles_with_permission(object_type='{object_type}', permission='{permission}') => {roles}")
     return roles
 
 
@@ -413,37 +419,46 @@ def _decorator_factory(max_depth=5):
 
 @_decorator_factory()
 def register_role_permissions():
-    global ANON_ROLE_PERMISSIONS, USER_ROLE_PERMISSIONS, ROLE_PERMISSIONS, PERMISSIONS
+    global ANON_ROLE_PERMISSIONS, USER_ROLE_PERMISSIONS, CREATOR_ROLE_PERMISSIONS, ROLE_PERMISSIONS, PERMISSIONS
     ccp = check_config_permission
+
+    def _append(list, value):
+        if value not in list: list.append(value)
+
+    def _remove(list, value):
+        if value in list: list.remove(value)
 
     PERMISSIONS = DEFAULT_PERMISSIONS
     ROLE_PERMISSIONS = {
-        'organization': DEFAULT_ORGANIZATION_ROLE_PERMISSIONS,
-        'group': DEFAULT_GROUP_ROLE_PERMISSIONS,
-        'package': DEFAULT_DATASET_ROLE_PERMISSIONS,
+        'organization': dict(DEFAULT_ORGANIZATION_ROLE_PERMISSIONS),
+        'group': dict(DEFAULT_GROUP_ROLE_PERMISSIONS),
+        'package': dict(DEFAULT_DATASET_ROLE_PERMISSIONS),
     }
 
     USER_ROLE_PERMISSIONS = []
     ANON_ROLE_PERMISSIONS = []
+    CREATOR_ROLE_PERMISSIONS = []
 
     # anon_create_dataset, create_dataset_if_not_in_organization, and create_unowned_dataset
     if ccp('create_dataset_if_not_in_organization') and ccp('create_unowned_dataset'):
+        CREATOR_ROLE_PERMISSIONS = ['package_create', 'package_update', 'package_delete', 'package_manage_users']
         USER_ROLE_PERMISSIONS = ['package_create', 'package_update', 'package_delete', 'user_read']
         if ccp('anon_create_dataset'):
             ANON_ROLE_PERMISSIONS = ['package_create', 'package_update', 'package_delete']
 
     if ccp('user_create_groups'):
-        USER_ROLE_PERMISSIONS.append('group_create')
+        _append(USER_ROLE_PERMISSIONS, 'group_create')
     if ccp('user_create_organizations'):
-        USER_ROLE_PERMISSIONS.append('organization_create')
+        _append(USER_ROLE_PERMISSIONS, 'organization_create')
 
     if ccp('user_delete_groups'):
-        ROLE_PERMISSIONS['group']['admin']['permissions'].append('group_delete')
+        _append(ROLE_PERMISSIONS['group']['admin']['permissions'], 'group_delete')
     if ccp('user_delete_organizations'):
-        ROLE_PERMISSIONS['organization']['admin']['permissions'].append('organization_delete')
+        _append(ROLE_PERMISSIONS['organization']['admin']['permissions'], 'organization_delete')
 
     if not ccp('allow_dataset_collaborators'):
         ROLE_PERMISSIONS['package'] = OrderedDict()
+        _remove(CREATOR_ROLE_PERMISSIONS, 'package_manage_users')
     elif not ccp('allow_admin_collaborators'):
         if 'admin' in ROLE_PERMISSIONS['package']:
             del ROLE_PERMISSIONS['package']['admin']
@@ -451,11 +466,10 @@ def register_role_permissions():
     if ccp('allow_dataset_collaborators') and not ccp('allow_collaborators_to_change_owner_org'):
         p = 'organization_manage_datasets'
         for role in ROLE_PERMISSIONS['package']:
-            if p in ROLE_PERMISSIONS['package'][role]['permissions']:
-                ROLE_PERMISSIONS['package'][role]['permissions'].remove(p)
+            _remove(ROLE_PERMISSIONS['package'][role]['permissions'], p)
 
     if ccp('public_user_details'):
-        ANON_ROLE_PERMISSIONS.append('user_read')
+        _append(ANON_ROLE_PERMISSIONS, 'user_read')
 
     errors = {}
     check_dict = {
@@ -477,24 +491,33 @@ def register_role_permissions():
         raise ValueError(errors)
 
 
+def _check_permission(permission):
+    if permission not in PERMISSIONS:
+        raise ValueError(f"Invalid permission '{permission}': should be one of {list(PERMISSIONS.keys())}!")
+
+
 @_decorator_factory()
-def has_user_permission(user_name_or_id, permission):
+def has_user_permission(user_name_or_id, permission, is_creator=False):
+    print(f"has_user_permission(user_name_or_id={user_name_or_id}, permission={permission}, is_creator={is_creator})")
     # check for user_name_or_id
     user_id = get_user_id_for_username(user_name_or_id, allow_none=True)
     if is_sysadmin(user_id):
         return True
 
-    if permission not in PERMISSIONS:
-        return False
+    _check_permission(permission)
 
     if user_id:
-        return permission in USER_ROLE_PERMISSIONS
+        if is_creator:
+            return permission in CREATOR_ROLE_PERMISSIONS
+        else:
+            return permission in USER_ROLE_PERMISSIONS
     else:
         return permission in ANON_ROLE_PERMISSIONS
 
 
 @_decorator_factory()
 def has_user_permission_for_package(package_id, user_name_or_id, permission):
+    print(f"has_user_permission_for_package(package_id={package_id}, user_name_or_id={user_name_or_id}, permission={permission})")
 
     # check for package
     package = model.Package.get(package_id)
@@ -506,11 +529,10 @@ def has_user_permission_for_package(package_id, user_name_or_id, permission):
     if is_sysadmin(user_id):
         return True
 
-    # check for user_name_or_id
-    if permission not in PERMISSIONS:
-        return False
+    _check_permission(permission)
 
     if user_id:
+        print(f"roles = {get_roles_with_permission('package', permission)}")
         q = model.Session.query(model.PackageMember) \
             .filter(model.PackageMember.user_id == user_id) \
             .filter(model.PackageMember.package_id == package.id) \
@@ -522,12 +544,13 @@ def has_user_permission_for_package(package_id, user_name_or_id, permission):
     if package.owner_org:
         return has_user_permission_for_organization(package.owner_org, user_name_or_id, permission)
 
-    return has_user_permission(user_id, permission)
+    return has_user_permission(user_id, permission, package.creator_user_id == user_id)
 
 
 @_decorator_factory()
 def has_user_permission_for_organization(organization_id, user_name, permission):
-    return None
+    print(f"has_user_permission_for_organization(organization_id={organization_id}, user_name={user_name}, permission={permission})")
+    return has_user_permission_for_group_or_org(organization_id, user_name, permission)
 
 
 @_decorator_factory()
@@ -536,6 +559,9 @@ def has_user_permission_for_group_or_org(group_id, user_name, permission):
     sysadmin rights and permission cascading down a group hierarchy.
 
     '''
+
+    print(f"has_user_permission_for_group_or_org(group_id={group_id}, user_name={user_name}, permission={permission})")
+
     if not group_id:
         return False
     group = model.Group.get(group_id)
@@ -570,24 +596,30 @@ def _has_user_permission_for_groups(user_id, permission, group_ids,
     group (ignoring permissions cascading in a group hierarchy).
     Can also be filtered by a particular capacity.
     '''
+    print(f"_has_user_permission_for_groups(user_id={user_id}, permission={permission}, group_ids={group_ids}, capacity={capacity})")
     if not group_ids:
         return False
-    # get any roles the user has for the group
-    q = model.Session.query(model.Member) \
+
+    group_permissions = get_roles_with_permission('group', permission)
+    organization_permissions = get_roles_with_permission('organization', permission)
+    print(f"group_permissions = {group_permissions}")
+    print(f"organization_permissions = {organization_permissions}")
+    q = model.Session.query(model.Member, model.Group) \
+        .join(model.Group, model.Member.group_id == model.Group.id) \
         .filter(model.Member.group_id.in_(group_ids)) \
         .filter(model.Member.table_name == 'user') \
         .filter(model.Member.state == 'active') \
-        .filter(model.Member.table_id == user_id)
+        .filter(model.Member.table_id == user_id) \
+        .filter(
+            or_(
+                and_(model.Member.capacity.in_(group_permissions), model.Group.is_organization == False),
+                and_(model.Member.capacity.in_(organization_permissions), model.Group.is_organization == True)
+            )
+        )
     if capacity:
         q = q.filter(model.Member.capacity == capacity)
     # see if any role has the required permission
-    # admin permission allows anything for the group
-    role_permissions = get_role_permissions('group')
-    for row in q.all():
-        perms = role_permissions.get(row.capacity, {}).get('permissions', [])
-        if 'admin' in perms or permission in perms:
-            return True
-    return False
+    return bool(q.count())
 
 
 def users_role_for_group_or_org(group_id, user_name):
