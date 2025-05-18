@@ -59,12 +59,11 @@ def test_get_user_outside_web_request_py2(mock_TypeError):
     assert mock_TypeError.called
 
 
-# This test is not working correctly as it breaks
-# @pytest.mark.skipif(six.PY2, reason='Only relevant to py3')
-# @mock.patch('flask.globals.RuntimeError')
-# def test_get_user_outside_web_request_py3(mock_RuntimeError):
-#     auth._get_user('example')
-#     assert mock_RuntimeError.called
+@pytest.mark.skipif(six.PY2, reason='Only relevant to py3')
+@mock.patch('flask.globals.RuntimeError')
+def test_get_user_outside_web_request_py3(mock_RuntimeError):
+    auth._get_user('example')
+    assert mock_RuntimeError.called
 
 
 @pytest.mark.usefixtures('with_request_context', 'clean_db')
