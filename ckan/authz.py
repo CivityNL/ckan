@@ -387,6 +387,17 @@ def get_roles_with_permission(object_type, permission):
     return roles
 
 
+def get_roles_with_cascading_permission(object_type, permission):
+    _check_permission(permission)
+    role_permissions = get_role_permissions(object_type)
+    roles = [
+        role for role in role_permissions
+        if 'cascading' in role_permissions[role] and permission in role_permissions[role]['cascading']
+    ]
+    print(f"get_roles_with_cascading_permission(object_type='{object_type}', permission='{permission}') => {roles}")
+    return roles
+
+
 def _decorator_factory(max_depth=5):
     def decorator(func):
         def wrapper(*args, **kwargs):
@@ -471,6 +482,11 @@ def register_role_permissions():
     if ccp('public_user_details'):
         _append(ANON_ROLE_PERMISSIONS, 'user_read')
 
+    for role in ccp('roles_that_cascade_to_sub_groups'):
+        for ot in ['group', 'organization']:
+            if role in ROLE_PERMISSIONS[ot]:
+                ROLE_PERMISSIONS[ot][role]['cascading'] = ROLE_PERMISSIONS[ot][role]['permissions']
+
     errors = {}
     check_dict = {
         ('anon',): ANON_ROLE_PERMISSIONS,
@@ -554,6 +570,28 @@ def has_user_permission_for_organization(organization_id, user_name, permission)
 
 
 @_decorator_factory()
+def _has_user_cascading_permission_for_group_or_org(group, user_id, permission):
+    print(f"_has_user_cascading_permission_for_group_or_org(group={group}, user_id={user_id}, permission={permission})")
+
+    group_roles = get_roles_with_cascading_permission('group', permission)
+    organization_roles = get_roles_with_cascading_permission('organization', permission)
+
+    if not group_roles and not organization_roles:
+        return False
+
+    parent_groups = group.get_parent_group_hierarchy(type=group.type)
+    for parent_group in parent_groups:
+        check = False
+        if parent_group.is_organization and organization_roles:
+            check = users_role_for_group_or_org(parent_group.id, user_id) in organization_roles
+        elif group_roles:
+            check = users_role_for_group_or_org(parent_group.id, user_id) in group_roles
+        if check:
+            return True
+    return False
+
+
+@_decorator_factory()
 def has_user_permission_for_group_or_org(group_id, user_name, permission):
     ''' Check if the user has the given permissions for the group, allowing for
     sysadmin rights and permission cascading down a group hierarchy.
@@ -578,20 +616,14 @@ def has_user_permission_for_group_or_org(group_id, user_name, permission):
         return False
     if _has_user_permission_for_groups(user_id, permission, [group_id]):
         return True
+
     # Handle when permissions cascade. Check the user's roles on groups higher
     # in the group hierarchy for permission.
-    for capacity in check_config_permission('roles_that_cascade_to_sub_groups'):
-        parent_groups = group.get_parent_group_hierarchy(type=group.type)
-        group_ids = [group_.id for group_ in parent_groups]
-        if _has_user_permission_for_groups(user_id, permission, group_ids,
-                                           capacity=capacity):
-            return True
-    return False
+    return _has_user_cascading_permission_for_group_or_org(group, user_id, permission)
 
 
 @_decorator_factory()
-def _has_user_permission_for_groups(user_id, permission, group_ids,
-                                    capacity=None):
+def _has_user_permission_for_groups(user_id, permission, group_ids, capacity=None):
     ''' Check if the user has the given permissions for the particular
     group (ignoring permissions cascading in a group hierarchy).
     Can also be filtered by a particular capacity.
@@ -677,65 +709,6 @@ def get_user_id_for_username(user_name, allow_none=False):
     if allow_none:
         return None
     raise Exception('Not logged in user')
-
-
-def can_manage_collaborators(package_id, user_id):
-    '''
-    Returns True if a user is allowed to manage the collaborators of a given
-    dataset.
-
-    Currently a user can manage collaborators if:
-
-    1. Is an administrator of the organization the dataset belongs to
-    2. Is a collaborator with role "admin" (
-        assuming :ref:`ckan.auth.allow_admin_collaborators` is set to True)
-    3. Is the creator of the dataset and the dataset does not belong to an
-        organization (
-        requires :ref:`ckan.auth.create_dataset_if_not_in_organization`
-        and :ref:`ckan.auth.create_unowned_dataset`)
-    '''
-    pkg = model.Package.get(package_id)
-
-    owner_org = pkg.owner_org
-
-    if (not owner_org
-            and check_config_permission('create_dataset_if_not_in_organization')
-            and check_config_permission('create_unowned_dataset')
-            and pkg.creator_user_id == user_id):
-        # User is the creator of this unowned dataset
-        return True
-
-    if has_user_permission_for_group_or_org(
-            owner_org, user_id, 'membership'):
-        # User is an administrator of the organization the dataset belongs to
-        return True
-
-    # Check if user is a collaborator with admin role
-    # TODO CIVDEV-1527: convert to permissions instead of capacaties
-    return user_is_collaborator_on_dataset(user_id, pkg.id, 'admin')
-
-
-def user_is_collaborator_on_dataset(user_id, dataset_id, capacity=None):
-    '''
-    Returns True if the provided user is a collaborator on the provided
-    dataset.
-
-    If capacity is provided it restricts the check to the capacity
-    provided (eg `admin` or `editor`). Multiple capacities can be
-    provided passing a list
-
-    '''
-
-    q = model.Session.query(model.PackageMember) \
-        .filter(model.PackageMember.user_id == user_id) \
-        .filter(model.PackageMember.package_id == dataset_id)
-
-    if capacity:
-        if isinstance(capacity, six.string_types):
-            capacity = [capacity]
-        q = q.filter(model.PackageMember.capacity.in_(capacity))
-
-    return q.count() > 0
 
 
 CONFIG_PERMISSIONS_DEFAULTS = {
