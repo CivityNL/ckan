@@ -1345,26 +1345,16 @@ class CollaboratorEditView(MethodView):
             return base.abort(404, _(u'Resource not found'))
 
         user = request.params.get(u'user_id')
-        # TODO CIVDEV-1527: define default capacity
-        user_capacity = u'member'
+        user_capacity = authz.get_least_role('package')
 
         if user:
-            collaborators = get_action(u'package_collaborator_list')(
-                context, data_dict)
+            collaborators = get_action(u'package_collaborator_list')(context, data_dict)
             for c in collaborators:
                 if c[u'user_id'] == user:
                     user_capacity = c[u'capacity']
             user = get_action(u'user_show')(context, {u'id': user})
 
-        capacities = []
-        # TODO CIVDEV-1527: fill capacities from logic
-        if authz.check_config_permission(u'allow_admin_collaborators'):
-            capacities.append({u'name': u'admin', u'value': u'admin'})
-        capacities.extend([
-            {u'name': u'editor', u'value': u'editor'},
-            {u'name': u'member', u'value': u'member'}
-        ])
-
+        capacities = [{'name': role, 'value': role} for role in authz.get_roles('package')]
         extra_vars = {
             u'capacities': capacities,
             u'user_capacity': user_capacity,
