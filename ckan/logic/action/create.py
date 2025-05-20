@@ -602,13 +602,12 @@ def member_create(context, data_dict=None):
         filter(model.Member.state == 'active').first()
     if member:
         user_obj = model.User.get(user)
-        # TODO CIVDEV-1527: convert to permissions instead of capacaties
+        admin_role = authz.get_admin_role('organization' if group.is_organization else 'group')
         if member.table_name == u'user' and \
                 member.table_id == user_obj.id and \
-                member.capacity == u'admin' and \
-                capacity != u'admin':
-            raise NotAuthorized("Administrators cannot revoke their "
-                                "own admin status")
+                member.capacity == admin_role and \
+                capacity != admin_role:
+            raise NotAuthorized("Administrators cannot revoke their own admin status")
     else:
         member = model.Member(table_name=obj_type,
                               table_id=obj.id,
@@ -656,7 +655,7 @@ def package_collaborator_create(context, data_dict):
         ['id', 'user_id', 'capacity']
     )
 
-    allowed_capacities = authz.get_collaborator_capacities()
+    allowed_capacities = authz.get_roles('package')
     if capacity not in allowed_capacities:
         raise ValidationError(
             _('Role must be one of "{}"').format(', '.join(
@@ -777,12 +776,11 @@ def _group_or_org_create(context, data_dict, is_org=False):
 
     # creator of group/org becomes an admin
     # this needs to be after the repo.commit or else revisions break
-    # TODO CIVDEV-1527: convert to permissions instead of capacaties
     member_dict = {
         'id': group.id,
         'object': user_id,
         'object_type': 'user',
-        'capacity': 'admin',
+        'capacity': authz.get_admin_role('organization' if is_org else 'group'),
     }
     member_create_context = {
         'model': model,

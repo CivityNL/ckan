@@ -540,8 +540,7 @@ class GroupController(base.BaseController):
                 tuplize_dict(parse_params(request.params))))
             data_dict['type'] = group_type or 'group'
             context['message'] = data_dict.get('log_message', '')
-            # TODO CIVDEV-1527: convert to permissions instead of capacaties
-            data_dict['users'] = [{'name': c.user, 'capacity': 'admin'}]
+            data_dict['users'] = [{'name': c.user, 'capacity': authz.get_admin_role('group')}]
             group = self._action('group_create')(context, data_dict)
 
             # Redirect to the appropriate _read route for the type of group
@@ -713,16 +712,15 @@ class GroupController(base.BaseController):
 
                 h.redirect_to(group_type + '_members', id=id)
             else:
+                default_role = authz.get_least_role('group')
                 user = request.params.get('user')
                 if user:
                     c.user_dict = \
                         get_action('user_show')(context, {'id': user})
-                    # TODO CIVDEV-1527: define default capacity
                     c.user_role = \
-                        authz.users_role_for_group_or_org(id, user) or 'member'
+                        authz.users_role_for_group_or_org(id, user) or default_role
                 else:
-                    # TODO CIVDEV-1527: define default capacity
-                    c.user_role = 'member'
+                    c.user_role = default_role
         except NotAuthorized:
             abort(403, _('Unauthorized to add member to group %s') % '')
         except NotFound:

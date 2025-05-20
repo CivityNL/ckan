@@ -860,8 +860,9 @@ class CreateGroupView(MethodView):
             ))
             data_dict['type'] = group_type or u'group'
             context['message'] = data_dict.get(u'log_message', u'')
-            # TODO CIVDEV-1527: convert to permissions instead of capacaties
-            data_dict['users'] = [{u'name': g.user, u'capacity': u'admin'}]
+            data_dict['users'] = [
+                {u'name': g.user, u'capacity': authz.get_admin_role('organization' if is_organization else 'group')}
+            ]
             group = _action(u'group_create')(context, data_dict)
 
         except (NotFound, NotAuthorized) as e:
@@ -1132,17 +1133,16 @@ class MembersGroupView(MethodView):
         roles = _action(u'member_roles_list')(context, {
             u'group_type': group_type
         })
+        default_role = authz.get_least_role('organization' if is_organization else 'group')
         if user:
             user_dict = get_action(u'user_show')(context, {u'id': user})
-            # TODO CIVDEV-1527: define default capacity
             user_role =\
-                authz.users_role_for_group_or_org(id, user) or u'member'
+                authz.users_role_for_group_or_org(id, user) or default_role
             # TODO: Remove
             g.user_dict = user_dict
             extra_vars["user_dict"] = user_dict
         else:
-            # TODO CIVDEV-1527: define default capacity
-            user_role = u'member'
+            user_role = default_role
 
         # TODO: Remove
         g.group_dict = group_dict
