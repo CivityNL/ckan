@@ -1,8 +1,6 @@
 # encoding: utf-8
 
 import functools
-import inspect
-import sys
 from sqlalchemy import or_, and_
 from collections import defaultdict, OrderedDict
 from logging import getLogger
@@ -286,7 +284,7 @@ def _get_permissions_with_prefix(prefix=None):
 
 DEFAULT_ORGANIZATION_ROLE_PERMISSIONS = OrderedDict([
     ('admin', {
-        'permissions': _get_permissions_with_prefix(['organization_', 'package_']),
+        'permissions': _get_permissions_with_prefix(['organization', 'package']),
         'label': _('Admin'),
         'description': _('Can add/edit and delete datasets, as well as manage organization members.'),
     }),
@@ -305,7 +303,7 @@ DEFAULT_ORGANIZATION_ROLE_PERMISSIONS = OrderedDict([
 
 DEFAULT_GROUP_ROLE_PERMISSIONS = OrderedDict([
     ('admin', {
-        'permissions': _get_permissions_with_prefix('group_'),
+        'permissions': _get_permissions_with_prefix('group'),
         'label': _('Admin'),
         'description': _('Can edit group information, as well as manage group members.'),
     }),
@@ -405,37 +403,6 @@ def get_roles_with_cascading_permission(object_type, permission):
     return roles
 
 
-def _decorator_factory(max_depth=5):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            co_names = func.__code__.co_varnames[:func.__code__.co_argcount]
-            co_values = [None]*len(co_names)
-            if func.__defaults__:
-                co_values[-(len(func.__defaults__)):] = func.__defaults__
-            co_values[:len(args)] = args
-            co_args = ""
-            if co_names:
-                co_args = "(" + " ".join([f"{key}='{co_values[i]}'" for i, key in enumerate(co_names)]) + ")"
-            log.debug(f"{func.__name__}{co_args} called from:")
-            f_back = inspect.currentframe().f_back
-            depth = 1
-            while f_back and (max_depth is None or depth <= max_depth):
-                func_name = f_back.f_code.co_name
-                file_name = f_back.f_code.co_filename
-                line_number = f_back.f_code.co_firstlineno
-                log.debug(f" {'-' * depth} {func_name} at {file_name}#L{line_number}")
-                f_back = f_back.f_back
-                depth += 1
-            if f_back:
-                log.debug(f" {'-' * depth} ... truncated ...")
-            result = func(*args, **kwargs)
-            log.debug(f"{func.__name__}{co_args} returned -> {result}")
-            return result
-        return wrapper
-    return decorator
-
-
-@_decorator_factory()
 def register_role_permissions():
     global ANON_ROLE_PERMISSIONS, USER_ROLE_PERMISSIONS, CREATOR_ROLE_PERMISSIONS, ROLE_PERMISSIONS, PERMISSIONS
     ccp = check_config_permission
@@ -519,7 +486,6 @@ def _check_permission(permission):
         raise ValueError(f"Invalid permission '{permission}': should be one of {list(PERMISSIONS.keys())}!")
 
 
-@_decorator_factory()
 def has_user_permission(user_name_or_id, permission, is_creator=False):
     print(f"has_user_permission(user_name_or_id={user_name_or_id}, permission={permission}, is_creator={is_creator})")
     # check for user_name_or_id
@@ -538,7 +504,6 @@ def has_user_permission(user_name_or_id, permission, is_creator=False):
         return permission in ANON_ROLE_PERMISSIONS
 
 
-@_decorator_factory()
 def has_user_permission_for_package(package_id, user_name_or_id, permission):
     print(f"has_user_permission_for_package(package_id={package_id}, user_name_or_id={user_name_or_id}, permission={permission})")
 
@@ -573,13 +538,11 @@ def has_user_permission_for_package(package_id, user_name_or_id, permission):
     return has_user_permission(user_id, permission, package.creator_user_id == user_id)
 
 
-@_decorator_factory()
 def has_user_permission_for_organization(organization_id, user_name, permission):
     print(f"has_user_permission_for_organization(organization_id={organization_id}, user_name={user_name}, permission={permission})")
     return has_user_permission_for_group_or_org(organization_id, user_name, permission)
 
 
-@_decorator_factory()
 def _has_user_cascading_permission_for_group_or_org(group, user_id, permission):
     print(f"_has_user_cascading_permission_for_group_or_org(group={group}, user_id={user_id}, permission={permission})")
 
@@ -601,7 +564,6 @@ def _has_user_cascading_permission_for_group_or_org(group, user_id, permission):
     return False
 
 
-@_decorator_factory()
 def has_user_permission_for_group_or_org(group_id, user_name, permission):
     ''' Check if the user has the given permissions for the group, allowing for
     sysadmin rights and permission cascading down a group hierarchy.
@@ -632,7 +594,6 @@ def has_user_permission_for_group_or_org(group_id, user_name, permission):
     return _has_user_cascading_permission_for_group_or_org(group, user_id, permission)
 
 
-@_decorator_factory()
 def _has_user_permission_for_groups(user_id, permission, group_ids, capacity=None):
     ''' Check if the user has the given permissions for the particular
     group (ignoring permissions cascading in a group hierarchy).
@@ -688,7 +649,6 @@ def users_role_for_group_or_org(group_id, user_name):
     return None
 
 
-@_decorator_factory()
 def has_user_permission_for_some_org(user_name, permission):
     ''' Check if the user has the given permission for any organization. '''
     user_id = get_user_id_for_username(user_name, allow_none=True)
