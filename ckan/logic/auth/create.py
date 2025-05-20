@@ -260,13 +260,22 @@ def member_create(context, data_dict):
     '''
     group = logic_auth.get_group_object(context, data_dict)
     user = context['user']
+    model = context['model']
 
     # User must be able to update the group to add a member to it
-    permission = 'update'
-    # However if the user is member of group then they can add/remove datasets
-    if not group.is_organization and data_dict.get('object_type') == 'package':
-        permission = 'manage_group'
+    prefix = 'organization' if group.is_organization else 'group'
+    suffix = None
 
+    if data_dict.get('object_type') == 'package':
+        suffix = 'manage_packages'
+    if data_dict.get('object_type') == 'user':
+        suffix = 'manage_users'
+    if data_dict.get('object_type') == 'group':
+        group = model.Group.get(data_dict.get('object', None))
+        suffix = 'manage_groups'
+        if group and group.is_organization:
+            suffix = 'manage_organizations'
+    permission = '{prefix}_{suffix}'.format(prefix=prefix, suffix=suffix)
     authorized = authz.has_user_permission_for_group_or_org(group.id, user, permission)
     if not authorized:
         return {'success': False,
