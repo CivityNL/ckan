@@ -253,7 +253,7 @@ def package_collaborator_list(context, data_dict):
 
     capacity = data_dict.get('capacity')
 
-    allowed_capacities = authz.get_collaborator_capacities()
+    allowed_capacities = authz.get_roles('package')
     if capacity and capacity not in allowed_capacities:
         raise ValidationError(
             _('Capacity must be one of "{}"').format(', '.join(
@@ -301,7 +301,7 @@ def package_collaborator_list_for_user(context, data_dict):
         raise NotAuthorized(_('Not allowed to retrieve collaborators'))
 
     capacity = data_dict.get('capacity')
-    allowed_capacities = authz.get_collaborator_capacities()
+    allowed_capacities = authz.get_roles('package')
     if capacity and capacity not in allowed_capacities:
         raise ValidationError(
             _('Capacity must be one of "{}"').format(', '.join(
@@ -3486,12 +3486,7 @@ def member_roles_list(context, data_dict):
 
     '''
     group_type = data_dict.get('group_type', 'organization')
-    roles_list = authz.roles_list()
-    # TODO CIVDEV-1527: get list from logic
-    if group_type == 'group':
-        roles_list = [role for role in roles_list
-                      if role['value'] != 'editor']
-
+    roles_list = authz.roles_list(group_type)
     _check_access('member_roles_list', context, data_dict)
     return roles_list
 

@@ -177,13 +177,16 @@ def _get_user(username):
 def get_group_or_org_admin_ids(group_id):
     if not group_id:
         return []
-    group_id = model.Group.get(group_id).id
-    # TODO CIVDEV-1527: convert to permissions instead of capacaties
+    group = model.Group.get(group_id)
+    if not group:
+        return []
+    object_type = 'organization' if group.is_organization else 'group'
+    capacity = get_admin_role(object_type)
     q = model.Session.query(model.Member) \
-        .filter(model.Member.group_id == group_id) \
+        .filter(model.Member.group_id == group.id) \
         .filter(model.Member.table_name == 'user') \
         .filter(model.Member.state == 'active') \
-        .filter(model.Member.capacity == 'admin')
+        .filter(model.Member.capacity == capacity)
     return [a.table_id for a in q.all()]
 
 
@@ -229,15 +232,6 @@ def is_authorized(action, context, data_dict=None):
         return auth_function(context, data_dict)
     else:
         raise ValueError(_('Authorization function not found: %s' % action))
-
-
-def get_collaborator_capacities():
-    if check_config_permission('allow_admin_collaborators'):
-    # TODO CIVDEV-1527: get list from capacities
-        return ('admin', 'editor', 'member')
-    else:
-    # TODO CIVDEV-1527: get list from capacities
-        return ('editor', 'member')
 
 
 def trans_role(object_type, role):
@@ -372,6 +366,19 @@ def get_creator_role_permissions():
 def get_role_permission_object_types():
     assert ROLE_PERMISSIONS is not None
     return list(ROLE_PERMISSIONS.keys())
+
+
+def get_least_role(object_type):
+    return get_roles(object_type)[-1]
+
+
+def get_admin_role(object_type):
+    return get_roles(object_type)[0]
+
+
+def get_roles(object_type):
+    assert ROLE_PERMISSIONS is not None
+    return list(ROLE_PERMISSIONS[object_type])
 
 
 def get_role_permissions(object_type):
@@ -547,7 +554,10 @@ def has_user_permission_for_package(package_id, user_name_or_id, permission):
 
     _check_permission(permission)
 
+    is_creator = package.creator_user_id == user_id
+
     if user_id:
+        # check if this user is a member of this package
         print(f"roles = {get_roles_with_permission('package', permission)}")
         q = model.Session.query(model.PackageMember) \
             .filter(model.PackageMember.user_id == user_id) \
@@ -775,6 +785,7 @@ def auth_is_registered_user():
     '''
     return auth_is_loggedin_user()
 
+
 def auth_is_loggedin_user():
     ''' Do we have a logged in user '''
     try:
@@ -782,6 +793,7 @@ def auth_is_loggedin_user():
     except TypeError:
         context_user = None
     return bool(context_user)
+
 
 def auth_is_anon_user(context):
     ''' Is this an anonymous user?
