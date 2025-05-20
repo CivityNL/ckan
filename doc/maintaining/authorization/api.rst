@@ -1,6 +1,6 @@
---------------------
-Action API reference
---------------------
+---------------------------
+Authorization API reference
+---------------------------
 
 ckan.logic.auth.get
 =====================
@@ -11,7 +11,7 @@ ckan.logic.auth.get
 ckan.logic.auth.create
 ========================
 
-.. automodule:: ckan.logic.action.create
+.. automodule:: ckan.logic.auth.create
    :members:
 
 ckan.logic.auth.update

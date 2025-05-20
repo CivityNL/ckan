@@ -35,3 +35,4 @@ The following sections explain each of the four methods in turn.
    configuration
    extensions
    api
+   authz

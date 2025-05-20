@@ -175,6 +175,15 @@ def _get_user(username):
 
 
 def get_group_or_org_admin_ids(group_id):
+    '''
+    Returns a list of user IDs which have the highest role (a.k.a. admin role) for a group or organization
+
+    :param group_id: id of the group or organization
+    :type group_id: string
+
+    :return: list of user IDs
+    :rtype: list of strings
+    '''
     if not group_id:
         return []
     group = model.Group.get(group_id)
@@ -198,6 +207,23 @@ def is_authorized_boolean(action, context, data_dict=None):
 
 
 def is_authorized(action, context, data_dict=None):
+    '''
+    Wrapper around the actual authorization functions. Checks additionally for:
+
+    - ignore_auth in context
+    - deleted and/or sysadmin users (see also :py:func:`~ckan.plugins.toolkit.ckan.plugins.toolkit.auth_sysadmins_check`)
+    - anonymous users (see also :py:func:`~ckan.plugins.toolkit.ckan.plugins.toolkit.auth_allow_anonymous_access`)
+
+    :param action: name of the action
+    :type action: string
+    :param context: request context
+    :type context: dictionary
+    :param data_dict: additional information to pass to the authorization function, defaults to None
+    :type data_dict: dictionary, optional
+
+    :return: list of user ID's
+    :rtype: list of strings
+    '''
     if context.get('ignore_auth'):
         return {'success': True}
 
@@ -277,6 +303,15 @@ DEFAULT_PERMISSIONS = {
 
 
 def _get_permissions_with_prefix(prefix=None):
+    '''
+    Helper function to get all permissions based on a prefix (e.g. 'group_' or 'package_') or multiple prefixes.
+
+    :param prefix: name of the action, defaults to None
+    :type prefix: string or list of strings, optional
+
+    :return: list of permissions
+    :rtype: list of strings
+    '''
     if prefix is None:
         return []
     if isinstance(prefix, str):
