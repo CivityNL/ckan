@@ -60,14 +60,14 @@ def owner_org_validator(key, data, errors, context):
         new_owner_org = group.id
 
     if old_owner_org is None:
-        if not authz.has_user_permission_for_organization(new_owner_org, user, 'package_create'):
+        if not authz.has_user_permission_for_organization(new_owner_org, user.id, 'package_create'):
             raise Invalid(_('You cannot add a dataset to this organization'))
     elif new_owner_org != old_owner_org:
         old_check = authz.has_user_permission_for_package(package.id, user, 'organization_manage_packages')
         if new_owner_org == '':
-            new_check = authz.has_user_permission(user, 'organization_manage_packages')
+            new_check = authz.has_user_permission(user.id, 'organization_manage_packages')
         else:
-            new_check = authz.has_user_permission_for_organization(new_owner_org, user, 'organization_manage_packages')
+            new_check = authz.has_user_permission_for_organization(new_owner_org, user.id, 'organization_manage_packages')
         if not old_check or not new_check:
             raise Invalid(_('You cannot move this dataset to another organization'))
 
