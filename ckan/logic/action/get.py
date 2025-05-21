@@ -205,16 +205,24 @@ def member_list(context, data_dict=None):
     if capacity:
         q = q.filter(model.Member.capacity == capacity)
 
-    trans = authz.roles_trans()
+    auth_object_type = 'organization' if group.is_organization else 'group'
 
-    def translated_capacity(capacity):
-        try:
-            return trans[capacity]
-        except KeyError:
-            return capacity
+    def translated_capacity(table_name, capacity):
+        if table_name == 'user':
+            try:
+                return authz.get_role_label(auth_object_type, capacity)
+            except KeyError:
+                return capacity
+        return capacity
 
-    return [(m.table_id, m.table_name, translated_capacity(m.capacity))
-            for m in q.all()]
+    return [
+        (
+            m.table_id,
+            m.table_name,
+            translated_capacity(m.table_name, m.capacity)
+        )
+        for m in q.all()
+    ]
 
 
 def package_collaborator_list(context, data_dict):
@@ -3486,9 +3494,9 @@ def member_roles_list(context, data_dict):
 
     '''
     group_type = data_dict.get('group_type', 'organization')
-    roles_list = authz.roles_list(group_type)
+    roles_list = authz.get_roles(group_type)
     _check_access('member_roles_list', context, data_dict)
-    return roles_list
+    return [{'value': role, 'text': authz.get_role_label(group_type, role)} for role in roles_list]
 
 
 def help_show(context, data_dict):

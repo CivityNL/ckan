@@ -41,6 +41,7 @@ __all__ = [
     u'IForkObserver',
     u'IApiToken',
     u'IClick',
+    u'IAuthorization'
 ]
 
 
@@ -2045,11 +2046,11 @@ class IClick(Interface):
 
 
 class IAuthorization(Interface):
-    u"""
+    '''
     Allows extensions to provide their own authorization roles and/or permissions.
-    """
+    '''
 
-    def get_roles(self, roles):
+    def get_user_permissions(self, user_permissions):
         u"""Return the path to the template for the dataset edit page.
 
         The path should be relative to the plugin's templates dir, e.g.
@@ -2058,28 +2059,10 @@ class IAuthorization(Interface):
         :rtype: string
 
         """
-        return roles
+        return user_permissions
 
-    def get_dataset_roles(self, dataset_roles):
-        return dataset_roles
-
-    def get_group_roles(self, group_roles):
-        return group_roles
-
-    def get_organization_roles(self, organization_roles):
-        return organization_roles
-
-    def get_custom_object_roles(self, custom_object_roles):
-        return custom_object_roles
+    def get_object_role_permissions(self, object_role_permissions):
+        return object_role_permissions
 
     def get_permissions(self, permissions):
         return permissions
-
-    def get_permission_groups(self, permission_groups):
-        return permission_groups
-
-    def get_anon_permissions(self, anon_permissions):
-        return anon_permissions
-
-    def get_user_permissions(self, user_permissions):
-        return user_permissions

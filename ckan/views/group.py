@@ -543,11 +543,30 @@ def members(id, group_type, is_organization):
                    _(u'User %r not authorized to edit members of %s') %
                    (g.user, id))
 
+    object_type = 'organization' if is_org else 'group'
+    # member_list returns role labels instead of role names
+    role_labels = [authz.get_role_label(object_type, role) for role in authz.get_roles(object_type)]
+    deprecated = 0
+    for index, member in enumerate(members):
+        if member[2] not in role_labels:
+            deprecated += 1
+            members[index] += (True,)
+        else:
+            members[index] += (False,)
+
+    print(members)
+
     # TODO: Remove
     # ckan 2.9: Adding variables that were removed from c object for
     # compatibility with templates in existing extensions
     g.members = members
     g.group_dict = group_dict
+
+    if deprecated:
+        h.flash_error(
+            _('This {object_type} contains {n} member(s) which have a deprecated role.'
+              .format(n=deprecated, object_type=object_type))
+        )
 
     extra_vars = {
         u"members": members,

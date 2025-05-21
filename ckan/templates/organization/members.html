@@ -22,8 +22,8 @@
       </tr>
     </thead>
     <tbody>
-      {% for user_id, user, role in members %}
-        <tr>
+      {% for user_id, user, role, deprecated in members %}
+        <tr class="{{ 'danger' if deprecated }}">
           <td class="media">
             {{ h.linked_user(user_id, maxlength=20) }}
           </td>
