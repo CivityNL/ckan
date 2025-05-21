@@ -86,7 +86,7 @@ def group_delete(context, data_dict):
         return {'success': False,
             'msg': _('User %s not authorized to delete groups') % user}
     authorized = authz.has_user_permission_for_group_or_org(
-        group.id, user, 'delete')
+        group.id, user, 'group_delete')
     if not authorized:
         return {'success': False, 'msg': _('User %s not authorized to delete group %s') % (user ,group.id)}
     else:
@@ -110,7 +110,7 @@ def organization_delete(context, data_dict):
         return {'success': False,
             'msg': _('User %s not authorized to delete organizations') % user}
     authorized = authz.has_user_permission_for_group_or_org(
-        group.id, user, 'delete')
+        group.id, user, 'organization_delete')
     if not authorized:
         return {'success': False, 'msg': _('User %s not authorized to delete organization %s') % (user ,group.id)}
     else:

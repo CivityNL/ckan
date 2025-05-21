@@ -86,7 +86,7 @@ def group_update(context, data_dict):
     user = context['user']
     authorized = authz.has_user_permission_for_group_or_org(group.id,
                                                                 user,
-                                                                'update')
+                                                                'group_update')
     if not authorized:
         return {'success': False,
                 'msg': _('User %s not authorized to edit group %s') %
@@ -99,7 +99,7 @@ def organization_update(context, data_dict):
     group = logic_auth.get_group_object(context, data_dict)
     user = context['user']
     authorized = authz.has_user_permission_for_group_or_org(
-        group.id, user, 'update')
+        group.id, user, 'organization_update')
     if not authorized:
         return {'success': False,
                 'msg': _('User %s not authorized to edit organization %s') %
@@ -130,8 +130,9 @@ def group_edit_permissions(context, data_dict):
     user = context['user']
     group = logic_auth.get_group_object(context, data_dict)
 
+    permission = 'organization_update' if group.is_organization else 'group_update'
     authorized = authz.has_user_permission_for_group_or_org(
-        group.id, user, 'update')
+        group.id, user, permission)
 
     if not authorized:
         return {
@@ -238,7 +239,7 @@ def bulk_update_private(context, data_dict):
     org_id = data_dict.get('org_id')
     user = context['user']
     authorized = authz.has_user_permission_for_group_or_org(
-        org_id, user, 'update')
+        org_id, user, 'package_update')
     if not authorized:
         return {'success': False}
     return {'success': True}
@@ -248,7 +249,7 @@ def bulk_update_public(context, data_dict):
     org_id = data_dict.get('org_id')
     user = context['user']
     authorized = authz.has_user_permission_for_group_or_org(
-        org_id, user, 'update')
+        org_id, user, 'package_update')
     if not authorized:
         return {'success': False}
     return {'success': True}
@@ -258,7 +259,7 @@ def bulk_update_delete(context, data_dict):
     org_id = data_dict.get('org_id')
     user = context['user']
     authorized = authz.has_user_permission_for_group_or_org(
-        org_id, user, 'update')
+        org_id, user, 'package_delete')
     if not authorized:
         return {'success': False}
     return {'success': True}

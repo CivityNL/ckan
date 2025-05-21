@@ -9,7 +9,6 @@
 {% endblock %}
 
 {% block primary_content_inner %}
-  {% set collaborators = h.get_collaborators(pkg_dict['id'])%}
   {% set count = collaborators|length %}
   {% set collaborators_count = ungettext('{count} collaborator', '{count} collaborators', count).format(count=count) %}
   <h3 class="page-heading">{{ collaborators_count }}</h3>
@@ -22,8 +21,8 @@
       </tr>
     </thead>
     <tbody>
-      {% for user_id, capacity in collaborators %}
-        <tr>
+      {% for user_id, capacity, deprecated in collaborators %}
+        <tr class="{{ 'danger' if deprecated }}">
           <td class="media">
             {{ h.linked_user(user_id, maxlength=20) }}
           </td>

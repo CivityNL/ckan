@@ -15,6 +15,7 @@ import ckan.model as model
 from ckan.common import _, g
 
 import ckan.lib.maintain as maintain
+from ckan.plugins import PluginImplementations
 from ckan.plugins.interfaces import IAuthorization
 
 log = getLogger(__name__)
@@ -258,26 +259,6 @@ def is_authorized(action, context, data_dict=None):
         raise ValueError(_('Authorization function not found: %s' % action))
 
 
-def trans_role(object_type, role):
-    return get_role_permissions(object_type)[role]['label']
-
-
-def roles_list(object_type):
-    ''' returns list of roles for forms '''
-    roles = []
-    for role in get_role_permissions(object_type):
-        roles.append(dict(text=trans_role(object_type, role), value=role))
-    return roles
-
-
-def roles_trans(object_type):
-    ''' return dict of roles with translation '''
-    roles = {}
-    for role in get_role_permissions(object_type):
-        roles[role] = trans_role(object_type, role)
-    return roles
-
-
 DEFAULT_PERMISSIONS = {
     'user_read': 'Read an user',
     'organization_read': 'Read an organization',
@@ -320,32 +301,32 @@ def _get_permissions_with_prefix(prefix=None):
 DEFAULT_ORGANIZATION_ROLE_PERMISSIONS = OrderedDict([
     ('admin', {
         'permissions': _get_permissions_with_prefix(['organization', 'package']),
-        'label': _('Admin'),
-        'description': _('Can add/edit and delete datasets, as well as manage organization members.'),
+        'label': lambda: _('Admin'),
+        'description': lambda: _('Can add/edit and delete datasets, as well as manage organization members.'),
     }),
     ('editor', {
         'permissions': ['organization_read', 'package_create', 'package_update', 'package_delete',
                         'organization_manage_packages'],
-        'label': _('Editor'),
-        'description': _('Can add and edit datasets, but not manage organization members.'),
+        'label': lambda: _('Editor'),
+        'description': lambda: _('Can add and edit datasets, but not manage organization members.'),
     }),
     ('member', {
         'permissions': ['organization_read'],
-        'label': _('Member'),
-        'description': _('Can view the organization\'s private datasets, but not add new datasets.'),
+        'label': lambda: _('Member'),
+        'description': lambda: _('Can view the organization\'s private datasets, but not add new datasets.'),
     }),
 ])
 
 DEFAULT_GROUP_ROLE_PERMISSIONS = OrderedDict([
     ('admin', {
         'permissions': _get_permissions_with_prefix('group'),
-        'label': _('Admin'),
-        'description': _('Can edit group information, as well as manage group members.'),
+        'label': lambda: _('Admin'),
+        'description': lambda: _('Can edit group information, as well as manage group members.'),
     }),
     ('member', {
         'permissions': ['group_read', 'group_manage_packages'],
-        'label': _('Member'),
-        'description': _('Can add/remove datasets from groups.'),
+        'label': lambda: _('Member'),
+        'description': lambda: _('Can add/remove datasets from groups.'),
     }),
 ])
 
@@ -401,15 +382,74 @@ def get_role_permission_object_types():
     return list(ROLE_PERMISSIONS.keys())
 
 
+def get_role_by_index(object_type, index):
+    try:
+        return get_roles(object_type)[index]
+    except IndexError as e:
+        return None
+
+
+def get_role_label(object_type, role):
+    '''
+    Returns the translated label for a role
+
+    :param object_type:
+    :type object_type: string
+    :param role:
+    :type role: string
+    :return: label of the given ``role`` for the given ``object_type``
+    :rtype string
+    '''
+    return ROLE_PERMISSIONS[object_type][role]['label']()
+
+
+def get_role_description(object_type, role):
+    '''
+    Returns the translated description for a role
+
+    :param object_type: type of object
+    :type object_type: string
+    :param role: role name
+    :type role: string
+    :return: description of the given ``role`` for the given ``object_type``
+    :rtype string
+    '''
+    return ROLE_PERMISSIONS[object_type][role]['description']()
+
+
 def get_least_role(object_type):
-    return get_roles(object_type)[-1]
+    '''
+    Returns the least/member role for a given ``object_type``
+
+    :param object_type: type of object
+    :type object_type: string
+    :return: role name
+    :rtype string
+    '''
+    return get_role_by_index(object_type, -1)
 
 
 def get_admin_role(object_type):
-    return get_roles(object_type)[0]
+    '''
+    Returns the highest/member role for a given ``object_type``
+
+    :param object_type: type of object
+    :type object_type: string
+    :return: role name
+    :rtype string
+    '''
+    return get_role_by_index(object_type, 0)
 
 
 def get_roles(object_type):
+    '''
+    Returns the list of role names for a given ``object_type``
+
+    :param object_type: type of object
+    :type object_type: string
+    :return: list of role names
+    :rtype list of strings
+    '''
     assert ROLE_PERMISSIONS is not None
     return list(ROLE_PERMISSIONS[object_type])
 
@@ -420,6 +460,16 @@ def get_role_permissions(object_type):
 
 
 def get_roles_with_permission(object_type, permission):
+    '''
+    Returns the list of role names for a given ``object_type`` which have the given ``permission``
+
+    :param object_type: type of object
+    :type object_type: string
+    :param permission: permission
+    :type permission: string
+    :return: list of role names
+    :rtype list of strings
+    '''
     _check_permission(permission)
     role_permissions = get_role_permissions(object_type)
     roles = [role for role in role_permissions if permission in role_permissions[role]['permissions']]
@@ -429,8 +479,8 @@ def get_roles_with_permission(object_type, permission):
 
 def get_roles_with_cascading_permission(object_type, permission):
     '''
-    Returns a list of role names for a given object_type which have the corresponding permission as a
-
+    Returns a list of role names for a given ``object_type`` which have the corresponding permission as a cascading
+    permission
 
     :param object_type: type of object
     :type object_type: string
@@ -445,7 +495,6 @@ def get_roles_with_cascading_permission(object_type, permission):
         role for role in role_permissions
         if 'cascading' in role_permissions[role] and permission in role_permissions[role]['cascading']
     ]
-    print(f"get_roles_with_cascading_permission(object_type='{object_type}', permission='{permission}') => {roles}")
     return roles
 
 
@@ -503,9 +552,13 @@ def register_role_permissions():
         _append(ANON_ROLE_PERMISSIONS, 'user_read')
 
     for role in ccp('roles_that_cascade_to_sub_groups'):
-        for ot in ['group', 'organization']:
-            if role in ROLE_PERMISSIONS[ot]:
-                ROLE_PERMISSIONS[ot][role]['cascading'] = ROLE_PERMISSIONS[ot][role]['permissions']
+        if role in ROLE_PERMISSIONS['group']:
+            ROLE_PERMISSIONS['group'][role]['cascading'] = ROLE_PERMISSIONS['group'][role]['permissions']
+
+    for plugin in PluginImplementations(IAuthorization):
+        PERMISSIONS = plugin.get_permissions(PERMISSIONS)
+        PERMISSIONS = plugin.get_user_permissions(PERMISSIONS)
+        ROLE_PERMISSIONS = plugin.get_object_role_permissions(ROLE_PERMISSIONS)
 
     errors = {}
     check_dict = {
@@ -516,12 +569,14 @@ def register_role_permissions():
 
     for check_key, check_permissions in check_dict.items():
         for check_permission in check_permissions:
-            if check_permission not in PERMISSIONS:
+            try:
+                _check_permission(check_permission)
+            except ValueError as e:
                 _dict = errors
                 for check_key_item in check_key:
                     _dict.setdefault(check_key_item, {})
                     _dict = _dict.get(check_key_item)
-                _dict.setdefault(check_permission, 'Not existing permission')
+                _dict.setdefault(check_permission, str(e))
 
     if errors:
         raise ValueError(errors)
