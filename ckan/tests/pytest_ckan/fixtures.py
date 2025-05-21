@@ -43,6 +43,7 @@ import ckan.tests.factories as factories
 import ckan.plugins
 import ckan.cli
 import ckan.lib.search as search
+import ckan.authz as authz
 
 from ckan.common import config
 
@@ -80,9 +81,11 @@ def ckan_config(request, monkeypatch):
     _original = config.copy()
     for mark in request.node.iter_markers(u"ckan_config"):
         monkeypatch.setitem(config, *mark.args)
+    authz.register_role_permissions()
     yield config
     config.clear()
     config.update(_original)
+    authz.register_role_permissions()
 
 
 @pytest.fixture
