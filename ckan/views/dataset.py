@@ -1258,7 +1258,7 @@ def collaborators_read(package_type, id):
     data_dict = {u'id': id}
 
     try:
-        check_access(u'package_collaborator_list', context, data_dict)
+        collaborators = get_action(u'package_collaborator_list')(context, data_dict)
         # needed to ckan_extend package/edit_base.html
         pkg_dict = get_action(u'package_show')(context, data_dict)
     except NotAuthorized:
@@ -1267,8 +1267,23 @@ def collaborators_read(package_type, id):
     except NotFound:
         return base.abort(404, _(u'Dataset not found'))
 
+    roles = authz.get_roles('package')
+    deprecated = 0
+    for index, collaborator in enumerate(collaborators):
+        collaborators[index] = (collaborator['user_id'], collaborator['capacity'],)
+        if collaborator['capacity'] not in roles:
+            deprecated += 1
+            collaborators[index] += (True,)
+        else:
+            collaborators[index] += (False,)
+
+    if deprecated:
+        h.flash_error(_('This dataset contains {n} member(s) which have a deprecated role.'.format(n=deprecated)))
+
     return base.render(u'package/collaborators/collaborators.html', {
-        u'pkg_dict': pkg_dict})
+        u'pkg_dict': pkg_dict,
+        u'collaborators': collaborators
+    })
 
 
 def collaborator_delete(package_type, id, user_id):

@@ -320,7 +320,7 @@ def group_dictize(group, context,
             if group_.is_organization:
                 is_group_member = (context.get('user') and
                     authz.has_user_permission_for_group_or_org(
-                        group_.id, context.get('user'), 'read'))
+                        group_.id, context.get('user'), 'organization_read'))
                 if is_group_member:
                     q['include_private'] = True
 
