@@ -52,6 +52,7 @@ def package_create(context, data_dict):
 
     You must be authorized to create new datasets. If you specify any groups
     for the new dataset, you must also be authorized to edit these groups.
+    (see also :py:func:`ckan.logic.auth.create.package_create`)
 
     Plugins may change the parameters of this function depending on the value
     of the ``type`` parameter, see the
@@ -245,6 +246,7 @@ def package_create(context, data_dict):
 
 def resource_create(context, data_dict):
     '''Appends a new resource to a datasets list of resources.
+    (see also :py:func:`ckan.logic.auth.create.resource_create`)
 
     :param package_id: id of package that the resource should be added to.
 
@@ -354,6 +356,7 @@ def resource_create(context, data_dict):
 
 def resource_view_create(context, data_dict):
     '''Creates a new resource view.
+    (see also :py:func:`ckan.logic.auth.create.resource_view_create`)
 
     :param resource_id: id of the resource
     :type resource_id: string
@@ -415,7 +418,8 @@ def resource_view_create(context, data_dict):
 
 def resource_create_default_resource_views(context, data_dict):
     '''
-    Creates the default views (if necessary) on the provided resource
+    Creates the default views (if necessary) on the provided resource.
+    (see also :py:func:`ckan.logic.auth.create.resource_create_default_resource_views`)
 
     The function will get the plugins for the default views defined in
     the configuration, and if some were found the `can_view` method of
@@ -462,7 +466,8 @@ def resource_create_default_resource_views(context, data_dict):
 
 def package_create_default_resource_views(context, data_dict):
     '''
-    Creates the default views on all resources of the provided dataset
+    Creates the default views on all resources of the provided dataset.
+    (see also :py:func:`ckan.logic.auth.create.package_create_default_resource_views`)
 
     By default only view plugins that don't require the resource data to be in
     the DataStore are called. Passing `create_datastore_views` as True will
@@ -500,6 +505,7 @@ def package_relationship_create(context, data_dict):
     '''Create a relationship between two datasets (packages).
 
     You must be authorized to edit both the subject and the object datasets.
+    (see also :py:func:`ckan.logic.auth.create.package_relationship_create`)
 
     :param subject: the id or name of the dataset that is the subject of the
         relationship
@@ -562,6 +568,7 @@ def member_create(context, data_dict=None):
     membership will be updated.
 
     You must be authorized to edit the group.
+    (see also :py:func:`ckan.logic.auth.create.member_create`)
 
     :param id: the id or name of the group to add the object to
     :type id: string
@@ -630,6 +637,7 @@ def package_collaborator_create(context, data_dict):
 
     Currently you must be an Admin on the dataset owner organization to
     manage collaborators.
+    (see also :py:func:`ckan.logic.auth.create.package_collaborator_create`)
 
     Note: This action requires the collaborators feature to be enabled with
     the :ref:`ckan.auth.allow_dataset_collaborators` configuration option.
@@ -805,6 +813,7 @@ def group_create(context, data_dict):
     '''Create a new group.
 
     You must be authorized to create groups.
+    (see also :py:func:`ckan.logic.auth.create.group_create`)
 
     Plugins may change the parameters of this function depending on the value
     of the ``type`` parameter, see the
@@ -876,6 +885,7 @@ def organization_create(context, data_dict):
     '''Create a new organization.
 
     You must be authorized to create organizations.
+    (see also :py:func:`ckan.logic.auth.create.organization_create`)
 
     Plugins may change the parameters of this function depending on the value
     of the ``type`` parameter, see the
@@ -935,7 +945,7 @@ def organization_create(context, data_dict):
 def rating_create(context, data_dict):
     '''Rate a dataset (package).
 
-    You must provide your API key in the Authorization header.
+    You must provide your API key in the Authorization header, but has no other form of authorization.
 
     :param package: the name or id of the dataset to rate
     :type package: string
@@ -989,6 +999,7 @@ def user_create(context, data_dict):
     '''Create a new user.
 
     You must be authorized to create users.
+    (see also :py:func:`ckan.logic.auth.create.user_create`)
 
     :param name: the name of the new user, a string between 2 and 100
         characters in length, containing only lowercase alphanumeric
@@ -1113,6 +1124,7 @@ def user_invite(context, data_dict):
     '''Invite a new user.
 
     You must be authorized to create group members.
+    (see also :py:func:`ckan.logic.auth.create.user_invite`)
 
     :param email: the email of the user to be invited to the group
     :type email: string
@@ -1210,6 +1222,7 @@ def vocabulary_create(context, data_dict):
     '''Create a new tag vocabulary.
 
     You must be a sysadmin to create vocabularies.
+    (see also :py:func:`ckan.logic.auth.create.vocabulary_create`)
 
     :param name: the name of the new vocabulary, e.g. ``'Genre'``
     :type name: string
@@ -1247,6 +1260,7 @@ def activity_create(context, activity_dict, **kw):
     '''Create a new activity stream activity.
 
     You must be a sysadmin to create new activities.
+    (see also :py:func:`ckan.logic.auth.create.activity_create`)
 
     :param user_id: the name or id of the user who carried out the activity,
         e.g. ``'seanh'``
@@ -1305,6 +1319,7 @@ def tag_create(context, data_dict):
     '''Create a new vocabulary tag.
 
     You must be a sysadmin to create vocabulary tags.
+    (see also :py:func:`ckan.logic.auth.create.tag_create`)
 
     You can only use this function to create tags that belong to a vocabulary,
     not to create free tags. (To create a new free tag simply add the tag to
@@ -1345,7 +1360,7 @@ def tag_create(context, data_dict):
 def follow_user(context, data_dict):
     '''Start following another user.
 
-    You must provide your API key in the Authorization header.
+    You must provide your API key in the Authorization header, but has no other form of authorization.
 
     :param id: the id or name of the user to follow, e.g. ``'joeuser'``
     :type id: string
@@ -1402,7 +1417,7 @@ def follow_user(context, data_dict):
 def follow_dataset(context, data_dict):
     '''Start following a dataset.
 
-    You must provide your API key in the Authorization header.
+    You must provide your API key in the Authorization header, but has no other form of authorization.
 
     :param id: the id or name of the dataset to follow, e.g. ``'warandpeace'``
     :type id: string
@@ -1502,6 +1517,7 @@ def group_member_create(context, data_dict):
     '''Make a user a member of a group.
 
     You must be authorized to edit the group.
+    (see also :py:func:`ckan.logic.auth.create.group_member_create`)
 
     :param id: the id or name of the group
     :type id: string
@@ -1522,6 +1538,7 @@ def organization_member_create(context, data_dict):
     '''Make a user a member of an organization.
 
     You must be authorized to edit the organization.
+    (see also :py:func:`ckan.logic.auth.create.organization_member_create`)
 
     :param id: the id or name of the organization
     :type id: string
@@ -1542,7 +1559,7 @@ def organization_member_create(context, data_dict):
 def follow_group(context, data_dict):
     '''Start following a group.
 
-    You must provide your API key in the Authorization header.
+    You must provide your API key in the Authorization header, but has no other form of authorization.
 
     :param id: the id or name of the group to follow, e.g. ``'roger'``
     :type id: string
@@ -1596,6 +1613,7 @@ def follow_group(context, data_dict):
 
 def api_token_create(context, data_dict):
     """Create new API Token for current user.
+    (see also :py:func:`ckan.logic.auth.create.api_token_create`)
 
     Apart from the `user` and `name` field that are required by
     default implementation, there may be additional fields registered

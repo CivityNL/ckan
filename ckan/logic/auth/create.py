@@ -8,6 +8,10 @@ from ckan.common import _
 
 @logic.auth_allow_anonymous_access
 def package_create(context, data_dict=None):
+    '''
+    Checks if a user is allowed to create a dataset.
+    Uses the `package_create` permission.
+    '''
     user = context['user']
     data_dict = data_dict or {}
     org_id = data_dict.get('owner_org')
@@ -30,6 +34,7 @@ def file_upload(context, data_dict=None):
 
 
 def resource_create(context, data_dict):
+    '''See :py:func:`ckan.logic.auth.update.package_update`'''
     model = context['model']
     user = context.get('user')
 
@@ -62,18 +67,25 @@ def resource_create(context, data_dict):
 
 
 def resource_view_create(context, data_dict):
+    '''See :py:func:`ckan.logic.auth.create.resource_create`'''
     return authz.is_authorized('resource_create', context, {'id': data_dict['resource_id']})
 
 
 def resource_create_default_resource_views(context, data_dict):
+    '''See :py:func:`ckan.logic.auth.create.resource_create`'''
     return authz.is_authorized('resource_create', context, {'id': data_dict['resource']['id']})
 
 
 def package_create_default_resource_views(context, data_dict):
+    '''See :py:func:`ckan.logic.auth.update.package_update`'''
     return authz.is_authorized('package_update', context, data_dict['package'])
 
 
 def package_relationship_create(context, data_dict):
+    '''
+    Checks if a user is allowed to create a relationship between 2 datasets.
+    See :py:func:`ckan.logic.auth.update.package_update`
+    '''
     user = context['user']
 
     id = data_dict['subject']
@@ -92,6 +104,9 @@ def package_relationship_create(context, data_dict):
 
 
 def group_create(context, data_dict=None):
+    '''
+    Uses the `group_create` permission.
+    '''
     user = context['user']
     if authz.has_user_permission(user, 'group_create'):
         return {'success': True}
@@ -100,6 +115,9 @@ def group_create(context, data_dict=None):
 
 
 def organization_create(context, data_dict=None):
+    '''
+    Uses the `organization_create` permission.
+    '''
     user = context['user']
     if authz.has_user_permission(user, 'organization_create'):
         return {'success': True}
@@ -114,6 +132,14 @@ def rating_create(context, data_dict):
 
 @logic.auth_allow_anonymous_access
 def user_create(context, data_dict=None):
+    '''
+    Checks if an user is allowed to create an user.
+    See also:
+
+    - :py:func:`~ckan.plugins.toolkit.ckan.plugins.toolkit.auth_allow_anonymous_access`
+    - :ref:`ckan.auth.create_user_via_api`
+    - :ref:`ckan.auth.create_user_via_web`
+    '''
     using_api = 'api_version' in context
     create_user_via_api = authz.check_config_permission('create_user_via_api')
     create_user_via_web = authz.check_config_permission('create_user_via_web')
@@ -129,12 +155,14 @@ def user_create(context, data_dict=None):
 
 
 def user_invite(context, data_dict):
+    '''See :py:func:`ckan.logic.auth.create.group_member_create`'''
     data_dict['id'] = data_dict['group_id']
     return group_member_create(context, data_dict)
 
 
 def _check_group_auth(context, data_dict):
-    '''Has this user got update permission for all of the given groups?
+    '''
+    Has this user got `group_manage_packages` permission for all of the given groups?
     If there is a package in the context then ignore that package's groups.
     (owner_org is checked elsewhere.)
     :returns: False if not allowed to update one (or more) of the given groups.
@@ -182,17 +210,17 @@ def _check_group_auth(context, data_dict):
 
 
 def vocabulary_create(context, data_dict):
-    # sysadmins only
+    '''sysadmins only'''
     return {'success': False}
 
 
 def activity_create(context, data_dict):
-    # sysadmins only
+    '''sysadmins only'''
     return {'success': False}
 
 
 def tag_create(context, data_dict):
-    # sysadmins only
+    '''sysadmins only'''
     return {'success': False}
 
 
@@ -206,14 +234,30 @@ def _group_or_org_member_create(context, data_dict, is_org=False):
 
 
 def organization_member_create(context, data_dict):
+    '''
+    Checks if a user is allowed to create a member to this organization.
+    Uses the `organization_manage_users` permission.
+    '''
     return _group_or_org_member_create(context, data_dict, is_org=True)
 
 
 def group_member_create(context, data_dict):
+    '''
+    Checks if a user is allowed to create a member to this group.
+    Uses the `group_manage_users` permission.
+    '''
     return _group_or_org_member_create(context, data_dict)
 
 
 def member_create(context, data_dict):
+    '''
+    Checks if a user is allowed to create a member to this group.
+    Depending on the ``object_type`` it uses the following permissions:
+
+    - ``package``: `*_manage_packages`
+    - ``user``: `*_manage_users`
+    - ``group``: `*_manage_groups` if a group, `*_manage_organizations` if an organization
+    '''
     group = logic_auth.get_group_object(context, data_dict)
     user = context['user']
     model = context['model']
@@ -241,7 +285,9 @@ def member_create(context, data_dict):
 
 
 def api_token_create(context, data_dict):
-    """Create new token for current user.
+    """
+    Checks if a user is allowed create a new token.
+    Only allowed for the current user
     """
     user = context['model'].User.get(data_dict['user'])
     return {'success': user.name == context['user']}
@@ -249,9 +295,9 @@ def api_token_create(context, data_dict):
 
 
 def package_collaborator_create(context, data_dict):
-    '''Checks if a user is allowed to add collaborators to a dataset
-
-    See :py:func:`~ckan.authz.can_manage_collaborators` for details
+    '''
+    Checks if a user is allowed to add collaborators to a dataset.
+    Uses the `package_manage_users` permission.
     '''
     user = context['user']
     model = context['model']

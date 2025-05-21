@@ -56,7 +56,7 @@ database and any custom configuration, extensions or templates to your new CKAN
 
    In particular, CKAN 2.x introduces an entirely new authorization system
    and any custom authorization settings you had in CKAN 1.x will have to be
-   reconsidered for CKAN 2.x. See :doc:`/maintaining/authorization` for details.
+   reconsidered for CKAN 2.x. See :doc:`/maintaining/authorization/index` for details.
 
 #. If you had any extensions installed in your CKAN 1.x instance that you also
    want to use with your CKAN 2.x instance, install those extensions in CKAN
