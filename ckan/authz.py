@@ -428,6 +428,17 @@ def get_roles_with_permission(object_type, permission):
 
 
 def get_roles_with_cascading_permission(object_type, permission):
+    '''
+    Returns a list of role names for a given object_type which have the corresponding permission as a
+
+
+    :param object_type: type of object
+    :type object_type: string
+    :param permission: permission
+    :type permission: string
+    :return: list of role names
+    :rtype list of strings
+    '''
     _check_permission(permission)
     role_permissions = get_role_permissions(object_type)
     roles = [

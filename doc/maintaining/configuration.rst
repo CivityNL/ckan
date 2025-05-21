@@ -691,7 +691,7 @@ Authorization Settings
 ----------------------
 
 More information about how authorization works in CKAN can be found the
-:doc:`authorization` section.
+:doc:`authorization/index` section.
 
 .. start_config-authorization
 
