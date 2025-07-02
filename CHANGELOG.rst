@@ -9,6 +9,13 @@ Changelog
 
 .. towncrier release notes start
 
+v.2.9.11-civity.7 TBD
+=====================
+
+WCAG-2.2 AA Compliance
+----------------------
+- Add `aria-label` and adjust `style` attribute to resolve 'target-size' violation - [CIVDEV-1561](https://civity.atlassian.net/browse/CIVDEV-1561)
+
 v.2.9.11-civity.5 TBD
 ===================
 
