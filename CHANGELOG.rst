@@ -9,6 +9,13 @@ Changelog
 
 .. towncrier release notes start
 
+v.2.9.11-civity.7 TBD
+=====================
+
+WCAG-2.2 AA Compliance
+----------------------
+- Add `aria-label` attribute to search buttons, to resolve 'button-name' violation - [CIVDEV-1566](https://civity.atlassian.net/browse/CIVDEV-1566)
+
 v.2.9.11-civity.5 TBD
 ===================
 
