@@ -16,18 +16,14 @@ WCAG-2.2 AA Compliance
 ----------------------
 - Add `aria-label` attribute to search buttons, to resolve 'button-name' violation - [CIVDEV-1566](https://civity.atlassian.net/browse/CIVDEV-1566)
 - Add `aria-label` and adjust `style` attribute to resolve 'target-size' violation - [CIVDEV-1561](https://civity.atlassian.net/browse/CIVDEV-1561)
+- Add `title` in resource iframe to resolve 'frame-title' violation - [CIVDEV-1610](https://civity.atlassian.net/browse/CIVDEV-1610)
 
 v.2.9.11-civity.6
 =================
 
-Major features
---------------
-
-Minor changes
--------------
-
-Bugfixes
---------
+WCAG-2.2 AA Compliance
+----------------------
+- Add `title` in resource iframe to resolve 'frame-title' violation - [CIVDEV-1610](https://civity.atlassian.net/browse/CIVDEV-1610)
 
 v.2.9.11-civity.5 TBD
 ===================
