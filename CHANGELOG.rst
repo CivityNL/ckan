@@ -9,6 +9,20 @@ Changelog
 
 .. towncrier release notes start
 
+v.2.9.11-civity.6
+=================
+
+Major features
+--------------
+
+Minor changes
+-------------
+
+- Datastore - Fix set_permissions.sql to support tables with non-ckan standard naming (e.g. capitalized table name) (`CIVDEV-1601 <https://civity.atlassian.net/browse/CIVDEV-1601>`_)
+
+Bugfixes
+--------
+
 v.2.9.11-civity.5 TBD
 ===================
 

@@ -103,7 +103,7 @@ DO $body$
                 'populate_full_text_trigger();', ' ')
             FROM pg_class
             LEFT OUTER JOIN pg_trigger AS t
-                ON t.tgrelid = relname::regclass AND t.tgname = 'zfulltext'
+                ON t.tgrelid = format('%I.%I', 'public', relname)::regclass AND t.tgname = 'zfulltext'
             WHERE relkind = 'r'::"char" AND t.tgname IS NULL
                 AND relnamespace = (
                     SELECT oid FROM pg_namespace WHERE nspname='public')),
