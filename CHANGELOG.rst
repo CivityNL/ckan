@@ -9,6 +9,13 @@ Changelog
 
 .. towncrier release notes start
 
+v.2.9.11-civity.7 TBD
+=====================
+
+WCAG-2.2 AA Compliance
+----------------------
+- Add attribute `aria-label` in `<a>` elements to resolve 'link-name' violation. - [CIVDEV-1562](https://civity.atlassian.net/browse/CIVDEV-1562)
+
 v.2.9.11-civity.5 TBD
 ===================
 
