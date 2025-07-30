@@ -14,6 +14,7 @@ v.2.9.11-civity.7 TBD
 
 WCAG-2.2 AA Compliance
 ----------------------
+- Add attribute `aria-label` in `<a>` elements to resolve 'link-name' violation. - [CIVDEV-1562](https://civity.atlassian.net/browse/CIVDEV-1562)
 - Add attribute `title` in all iframes `data-module="data-viewer"` to resolve 'frame-title' violation - [CIVDEV-1610](https://civity.atlassian.net/browse/CIVDEV-1610)
 - Add `aria-label` attribute to search buttons, to resolve 'button-name' violation - [CIVDEV-1566](https://civity.atlassian.net/browse/CIVDEV-1566)
 - Add `aria-label` and adjust `style` attribute to resolve 'target-size' violation - [CIVDEV-1561](https://civity.atlassian.net/browse/CIVDEV-1561)
