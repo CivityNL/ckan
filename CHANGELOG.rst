@@ -9,22 +9,25 @@ Changelog
 
 .. towncrier release notes start
 
-v.2.9.11-civity.7 TBD
-=====================
-
-WCAG-2.2 AA Compliance
-----------------------
-- Add attribute `aria-label` in `<a>` elements to resolve 'link-name' violation. - [CIVDEV-1562](https://civity.atlassian.net/browse/CIVDEV-1562)
-- Add attribute `title` in all iframes `data-module="data-viewer"` to resolve 'frame-title' violation - [CIVDEV-1610](https://civity.atlassian.net/browse/CIVDEV-1610)
-- Add `aria-label` attribute to search buttons, to resolve 'button-name' violation - [CIVDEV-1566](https://civity.atlassian.net/browse/CIVDEV-1566)
-- Add `aria-label` and adjust `style` attribute to resolve 'target-size' violation - [CIVDEV-1561](https://civity.atlassian.net/browse/CIVDEV-1561)
-
 v.2.9.11-civity.6
 =================
 
-WCAG-2.2 AA Compliance
-----------------------
-- Add `title` in resource iframe to resolve 'frame-title' violation - [CIVDEV-1610](https://civity.atlassian.net/browse/CIVDEV-1610)
+Major features
+--------------
+
+Minor changes
+-------------
+
+- Datastore - Fix set_permissions.sql to support tables with non-ckan standard naming (e.g. capitalized table name) (`CIVDEV-1601 <https://civity.atlassian.net/browse/CIVDEV-1601>`_)
+- WCAG-2.2 AA Compliance:
+
+  - Add attribute `aria-label` in `<a>` elements to resolve 'link-name' violation. - [CIVDEV-1562](https://civity.atlassian.net/browse/CIVDEV-1562)
+  - Add attribute `title` in all iframes `data-module="data-viewer"` to resolve 'frame-title' violation - [CIVDEV-1610](https://civity.atlassian.net/browse/CIVDEV-1610)
+  - Add `aria-label` attribute to search buttons, to resolve 'button-name' violation - [CIVDEV-1566](https://civity.atlassian.net/browse/CIVDEV-1566)
+  - Add `aria-label` and adjust `style` attribute to resolve 'target-size' violation - [CIVDEV-1561](https://civity.atlassian.net/browse/CIVDEV-1561)
+
+Bugfixes
+--------
 
 v.2.9.11-civity.5 TBD
 ===================
