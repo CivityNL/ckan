@@ -9,6 +9,13 @@ Changelog
 
 .. towncrier release notes start
 
+v.2.9.11-civity.7 TBD
+=====================
+
+WCAG-2.2 AA Compliance
+----------------------
+- Add attribute `title` in all iframes `data-module="data-viewer"` to resolve 'frame-title' violation - [CIVDEV-1610](https://civity.atlassian.net/browse/CIVDEV-1610)
+
 v.2.9.11-civity.5 TBD
 ===================
 
