@@ -1,10 +1,12 @@
 <section class="module module-narrow module-shallow simple-input">
   <h2 class="module-heading">{{ _('Users') }}</h2>
   <form class="module-content field-bordered" action="{% url_for 'user.index' %}" method="get" id="user-search-form">
-    <div class="field">
-      <label for="field-user-search">{{ _('Search Users') }}</label>
-      <input id="field-user-search" value="{{ q }}" class="field form-control" name="q" placeholder="{{ _('Search') }}" />
-      <button class="btn-search" type="submit"><i class="fa fa-search"></i></button>
+    <div class="field" style="display:flex;align-items:center;gap:8px;">
+      <label for="field-user-search" style="margin-right:8px;">{{ _('Search Users') }}</label>
+      <input id="field-user-search" value="{{ q }}" class="field form-control" name="q" placeholder="{{ _('Search') }}" aria-label="{{ _('Search Users') }}" style="min-height:40px;">
+      <button class="btn-search" type="submit" aria-label="{{ _('Submit') }}" style="min-width:24px; min-height:24px;">
+        <i class="fa fa-search"></i>
+      </button>
     </div>
   </form>
   <ul class="nav nav-simple">
