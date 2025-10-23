@@ -9,8 +9,8 @@ Changelog
 
 .. towncrier release notes start
 
-=======
-v.2.9.11-civity.7 TBD
+=====================
+v.2.9.11-civity.7
 =====================
 
 WCAG-2.2 AA Compliance
